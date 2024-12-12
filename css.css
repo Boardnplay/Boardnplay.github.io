@@ -13,10 +13,6 @@ h1 {
     margin: 10px;
 }
 
- a {
-    color: blue;
-    text-decoration: none;
-
 ul {
     display: grid;
     grid-template-columns: 1fr;
