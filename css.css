@@ -16,6 +16,7 @@ h1 {
  a {
     color: blue;
     text-decoration: none;
+ }
 
 ul {
     display: grid;
