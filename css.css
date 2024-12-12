@@ -14,6 +14,10 @@ h1 {
     color: white;
 }
 
+ a {
+    color: blue;
+    text-decoration: none;
+
 ul {
     display: grid;
     grid-template-columns: 1fr;
