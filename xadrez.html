@@ -1,115 +1,138 @@
 <!DOCTYPE html>
-
-<html lang="pt-BR">
+<html lang="pt-br">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Jogo de Xadrez</title>
-    <link rel="stylesheet" href="styles.css">
-</head>
-
-body {
-    font-family: Arial, sans-serif;
-    background-color: #f4f4f4;
-    margin: 0;
-    padding: 20px;
-}
-
-header {
-    text-align: center;
-    margin-bottom: 20px;
-}
-
-#chess-board {
-    display: grid;
-    grid-template-columns: repeat(8, 60px);
-    grid-template-rows: repeat(8, 60px);
-    gap: 0;
-}
-
-.cell {
-    width: 60px;
-    height: 60px;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    font-size: 2em;
-    cursor: pointer;
-}
-
-.white {
-    background-color: #fff;
-}
-
-.black {
-    background-color: #000;
-    color: #fff;
-}
-
-
-<body>
-    <header>
-        <h1>Jogo de Xadrez</h1>
-    </header>
-    <main>
-        <div id="chess-board"></div>
-    </main>
-    <script src="script.js"></script>
-
-    const board = document.getElementById('chess-board');
-const pieces = {
-    r: '♖', n: '♘', b: '♗', q: '♕', k: '♔', p: '♙',
-    R: '♜', N: '♞', B: '♟', Q: '♛', K: '♚', P: '♟'
-};
-
-let chessBoard = [
-    ['r', 'n', 'b', 'q', 'k', 'b', 'n', 'r'],
-    ['p', 'p', 'p', 'p', 'p', 'p', 'p', 'p'],
-    ['', '', '', '', '', '', '', ''],
-    ['', '', '', '', '', '', '', ''],
-    ['', '', '', '', '', '', '', ''],
-    ['', '', '', '', '', '', '', ''],
-    ['P', 'P', 'P', 'P', 'P', 'P', 'P', 'P'],
-    ['R', 'N', 'B', 'Q', 'K', 'B', 'N', 'R']
-];
-
-function drawBoard() {
-    board.innerHTML = '';
-    for (let row = 0; row < 8; row++) {
-        for (let col = 0; col < 8; col++) {
-            const cell = document.createElement('div');
-            cell.className = 'cell ' + ((row + col) % 2 === 0 ? 'white' : 'black');
-            cell.dataset.row = row;
-            cell.dataset.col = col;
-            cell.innerHTML = pieces[chessBoard[row][col]] || '';
-            cell.addEventListener('click', handleCellClick);
-            board.appendChild(cell);
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            height: 100vh;
+            margin: 0;
+            background-color: #f4f4f4;
         }
+
+        #chess-board {
+            display: grid;
+            grid-template-columns: repeat(8, 60px);
+            grid-template-rows: repeat(8, 60px);
+            gap: 0;
+            border: 2px solid #333;
+        }
+
+        .square {
+            width: 60px;
+            height: 60px;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            background-color: #f0d9b5;
+        }
+
+        .square:nth-child(even) {
+            background-color: #b58863;
+        }
+
+        .piece {
+            font-size: 36px;
+            cursor: pointer;
+        }
+
+        .piece.white {
+            color: white;
+        }
+
+        .piece.black {
+            color: black;
+        }
+
+        .selected {
+            background-color: rgba(0, 0, 255, 0.2);
+        }
+    </style>
+</head>
+<body>
+
+<div id="chess-board"></div>
+
+<script>
+    // Inicializando o tabuleiro de xadrez com as peças.
+    const board = [
+        ['r', 'n', 'b', 'q', 'k', 'b', 'n', 'r'],
+        ['p', 'p', 'p', 'p', 'p', 'p', 'p', 'p'],
+        ['', '', '', '', '', '', '', ''],
+        ['', '', '', '', '', '', '', ''],
+        ['', '', '', '', '', '', '', ''],
+        ['', '', '', '', '', '', '', ''],
+        ['P', 'P', 'P', 'P', 'P', 'P', 'P', 'P'],
+        ['R', 'N', 'B', 'Q', 'K', 'B', 'N', 'R']
+    ];
+
+    const chessBoard = document.getElementById('chess-board');
+
+    // Função para atualizar o tabuleiro com as peças
+    function renderBoard() {
+        chessBoard.innerHTML = '';
+        board.forEach((row, rowIndex) => {
+            row.forEach((square, colIndex) => {
+                const squareElement = document.createElement('div');
+                squareElement.classList.add('square');
+                const isWhiteSquare = (rowIndex + colIndex) % 2 === 0;
+
+                if (square) {
+                    const pieceElement = document.createElement('span');
+                    pieceElement.classList.add('piece');
+                    pieceElement.textContent = square;
+                    pieceElement.classList.add(isWhiteSquare ? 'white' : 'black');
+                    squareElement.appendChild(pieceElement);
+                }
+
+                squareElement.dataset.row = rowIndex;
+                squareElement.dataset.col = colIndex;
+                chessBoard.appendChild(squareElement);
+            });
+        });
     }
-}
 
-let selectedCell = null;
+    // Função para mover a peça
+    let selectedPiece = null;
 
-function handleCellClick(event) {
-    const row = event.target.dataset.row;
-    const col = event.target.dataset.col;
+    chessBoard.addEventListener('click', (e) => {
+        const square = e.target.closest('.square');
+        if (!square) return;
 
-    if (selectedCell) {
-        // Mover peça
-        const fromRow = selectedCell.dataset.row;
-        const fromCol = selectedCell.dataset.col;
-        chessBoard[row][col] = chessBoard[fromRow][fromCol];
-        chessBoard[fromRow][fromCol] = '';
-        selectedCell.classList.remove('selected');
-        selectedCell = null;
-    } else {
-        // Selecionar peça
-        selectedCell = event.target;
-        selectedCell.classList.add('selected');
-    }
-    drawBoard();
-}
+        const { row, col } = square.dataset;
+        const rowIndex = parseInt(row);
+        const colIndex = parseInt(col);
 
-drawBoard();
+        // Se uma peça foi selecionada
+        if (selectedPiece) {
+            const [selectedRow, selectedCol] = selectedPiece;
+            const piece = board[selectedRow][selectedCol];
+
+            // Mover a peça para o novo quadrado
+            if (piece) {
+                board[selectedRow][selectedCol] = '';
+                board[rowIndex][colIndex] = piece;
+                selectedPiece = null;
+                renderBoard();
+            }
+        } else {
+            const piece = board[rowIndex][colIndex];
+            if (piece) {
+                selectedPiece = [rowIndex, colIndex];
+                const allSquares = document.querySelectorAll('.square');
+                allSquares.forEach(square => square.classList.remove('selected'));
+                square.classList.add('selected');
+            }
+        }
+    });
+
+    renderBoard();
+</script>
+
 </body>
 </html>
