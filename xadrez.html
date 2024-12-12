@@ -1,70 +1,115 @@
 <!DOCTYPE html>
+
 <html lang="pt-BR">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Xadrez e Damas</title>
+    <title>Jogo de Xadrez</title>
     <link rel="stylesheet" href="styles.css">
 </head>
+
+body {
+    font-family: Arial, sans-serif;
+    background-color: #f4f4f4;
+    margin: 0;
+    padding: 20px;
+}
+
+header {
+    text-align: center;
+    margin-bottom: 20px;
+}
+
+#chess-board {
+    display: grid;
+    grid-template-columns: repeat(8, 60px);
+    grid-template-rows: repeat(8, 60px);
+    gap: 0;
+}
+
+.cell {
+    width: 60px;
+    height: 60px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 2em;
+    cursor: pointer;
+}
+
+.white {
+    background-color: #fff;
+}
+
+.black {
+    background-color: #000;
+    color: #fff;
+}
+
+
 <body>
     <header>
-        <h1>Xadrez e Damas</h1>
+        <h1>Jogo de Xadrez</h1>
     </header>
     <main>
-        <section class="board-container">
-            <h2>Tabuleiro de Xadrez</h2>
-            <div class="chess-board">
-                <!-- Tabuleiro de Xadrez -->
-                <div class="row">
-                    <div class="cell black"></div>
-                    <div class="cell white"></div>
-                    <div class="cell black"></div>
-                    <div class="cell white"></div>
-                    <div class="cell black"></div>
-                    <div class="cell white"></div>
-                    <div class="cell black"></div>
-                    <div class="cell white"></div>
-                </div>
-                <div class="row">
-                    <div class="cell white"></div>
-                    <div class="cell black"></div>
-                    <div class="cell white"></div>
-                    <div class="cell black"></div>
-                    <div class="cell white"></div>
-                    <div class="cell black"></div>
-                    <div class="cell white"></div>
-                    <div class="cell black"></div>
-                </div>
-                <!-- Adicione mais linhas conforme necessário -->
-            </div>
-        </section>
-        <section class="board-container">
-            <h2>Tabuleiro de Damas</h2>
-            <div class="checkers-board">
-                <!-- Tabuleiro de Damas -->
-                <div class="row">
-                    <div class="cell black"></div>
-                    <div class="cell white"></div>
-                    <div class="cell black"></div>
-                    <div class="cell white"></div>
-                    <div class="cell black"></div>
-                    <div class="cell white"></div>
-                    <div class="cell black"></div>
-                    <div class="cell white"></div>
-                </div>
-                <div class="row">
-                    <div class="cell white"></div>
-                    <div class="cell black"></div>
-                    <div class="cell white"></div>
-                    <div class="cell black"></div>
-                    <div class="cell white"></div>
-                    <div class="cell black"></div>
-                    <div class="cell white"></div>
-                    <div class="cell black"></div>
-                </div>
-                <!-- Adicione mais linhas conforme necessário -->
-            </div>
-        </section>
+        <div id="chess-board"></div>
     </main>
+    <script src="script.js"></script>
+
+    const board = document.getElementById('chess-board');
+const pieces = {
+    r: '♖', n: '♘', b: '♗', q: '♕', k: '♔', p: '♙',
+    R: '♜', N: '♞', B: '♟', Q: '♛', K: '♚', P: '♟'
+};
+
+let chessBoard = [
+    ['r', 'n', 'b', 'q', 'k', 'b', 'n', 'r'],
+    ['p', 'p', 'p', 'p', 'p', 'p', 'p', 'p'],
+    ['', '', '', '', '', '', '', ''],
+    ['', '', '', '', '', '', '', ''],
+    ['', '', '', '', '', '', '', ''],
+    ['', '', '', '', '', '', '', ''],
+    ['P', 'P', 'P', 'P', 'P', 'P', 'P', 'P'],
+    ['R', 'N', 'B', 'Q', 'K', 'B', 'N', 'R']
+];
+
+function drawBoard() {
+    board.innerHTML = '';
+    for (let row = 0; row < 8; row++) {
+        for (let col = 0; col < 8; col++) {
+            const cell = document.createElement('div');
+            cell.className = 'cell ' + ((row + col) % 2 === 0 ? 'white' : 'black');
+            cell.dataset.row = row;
+            cell.dataset.col = col;
+            cell.innerHTML = pieces[chessBoard[row][col]] || '';
+            cell.addEventListener('click', handleCellClick);
+            board.appendChild(cell);
+        }
+    }
+}
+
+let selectedCell = null;
+
+function handleCellClick(event) {
+    const row = event.target.dataset.row;
+    const col = event.target.dataset.col;
+
+    if (selectedCell) {
+        // Mover peça
+        const fromRow = selectedCell.dataset.row;
+        const fromCol = selectedCell.dataset.col;
+        chessBoard[row][col] = chessBoard[fromRow][fromCol];
+        chessBoard[fromRow][fromCol] = '';
+        selectedCell.classList.remove('selected');
+        selectedCell = null;
+    } else {
+        // Selecionar peça
+        selectedCell = event.target;
+        selectedCell.classList.add('selected');
+    }
+    drawBoard();
+}
+
+drawBoard();
 </body>
 </html>
