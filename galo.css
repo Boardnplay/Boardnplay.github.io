@@ -8,6 +8,11 @@
     cursor: pointer;
 }
 
+a {
+                color: blue;
+                text-decoration: none;
+            }
+
 .center {
                 display: block;
                 margin-left: auto;
