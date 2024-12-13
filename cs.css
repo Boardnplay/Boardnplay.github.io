@@ -11,6 +11,11 @@ body , html{
 	height: 80px;
 }
 
+a {
+                color: blue;
+                text-decoration: none;
+            }
+
 .white_square{
 	background-color:#F0D2B4;
 }
