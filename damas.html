@@ -1,141 +1,36 @@
-<!DOCTYPE html>
 <html>
-<head>
-	<title>
-		
-	</title>
-	<link rel="stylesheet" href="style.css">
-
-</head>
-<body id="ht">
-<!-- astea 2 sunt puse ca indexarea claselor sa inceapa de la 1 -->
-<div class="checker white_checker" style="display:none"> </div>
-<div class="checker black_checker" style="display:none"> </div>
-
-
-<div class="square" style="display: none" id ="ht"> </div>
-<div class="black_background" id="black_background"> </div>
-
-	<div class="score" id="score">
-		<br>
-	</div>
-<div class="table" id="table">
-
-	<div class="checker white_checker"> </div>
-	<div class="checker white_checker"> </div>
-	<div class="checker white_checker"> </div>
-	<div class="checker white_checker"> </div>
-	<div class="checker white_checker"> </div>
-	<div class="checker white_checker"> </div>
-	<div class="checker white_checker"> </div>
-	<div class="checker white_checker"> </div>	
-	<div class="checker white_checker"> </div>
-	<div class="checker white_checker"> </div>
-	<div class="checker white_checker"> </div>
-	<div class="checker white_checker"> </div>	
-
-	<div class="checker black_checker"> </div>
-	<div class="checker black_checker"> </div>
-	<div class="checker black_checker"> </div>
-	<div class="checker black_checker"> </div>
-	<div class="checker black_checker"> </div>
-	<div class="checker black_checker"> </div>
-	<div class="checker black_checker"> </div>
-	<div class="checker black_checker"> </div>
-	<div class="checker black_checker"> </div>
-	<div class="checker black_checker"> </div>
-	<div class="checker black_checker"> </div>
-	<div class="checker black_checker"> </div>
-
-
-	<div class="square black_square"> </div>
-	<div class="square white_square"> </div>
-	<div class="square black_square"> </div>
-	<div class="square white_square"> </div>
-	<div class="square black_square"> </div>
-	<div class="square white_square"> </div>
-	<div class="square black_square"> </div>
-	<div class="square white_square"> </div>
-	<div class="clear_float"> </div>
-	
-	<div class="square white_square"> </div>
-	<div class="square black_square"> </div>
-	<div class="square white_square"> </div>
-	<div class="square black_square"> </div>
-	<div class="square white_square"> </div>
-	<div class="square black_square"> </div>
-	<div class="square white_square"> </div>
-	<div class="square black_square"> </div>
-	<div class="clear_float"> </div>
-
-	<div class="square black_square"> </div>
-	<div class="square white_square"> </div>
-	<div class="square black_square"> </div>
-	<div class="square white_square"> </div>
-	<div class="square black_square"> </div>
-	<div class="square white_square"> </div>
-	<div class="square black_square"> </div>
-	<div class="square white_square"> </div>
-	<div class="clear_float"> </div>
-
-	<div class="square white_square"> </div>
-	<div class="square black_square"> </div>
-	<div class="square white_square"> </div>
-	<div class="square black_square"> </div>
-	<div class="square white_square"> </div>
-	<div class="square black_square"> </div>
-	<div class="square white_square"> </div>
-	<div class="square black_square"> </div>
-	<div class="clear_float"> </div>
-
-	<div class="square black_square"> </div>
-	<div class="square white_square"> </div>
-	<div class="square black_square"> </div>
-	<div class="square white_square"> </div>
-	<div class="square black_square"> </div>
-	<div class="square white_square"> </div>
-	<div class="square black_square"> </div>
-	<div class="square white_square"> </div>
-	<div class="clear_float"> </div>
-
-	<div class="square white_square"> </div>
-	<div class="square black_square"> </div>
-	<div class="square white_square"> </div>
-	<div class="square black_square"> </div>
-	<div class="square white_square"> </div>
-	<div class="square black_square"> </div>
-	<div class="square white_square"> </div>
-	<div class="square black_square"> </div>
-	<div class="clear_float"> </div>
-
-	<div class="square black_square"> </div>
-	<div class="square white_square"> </div>
-	<div class="square black_square"> </div>
-	<div class="square white_square"> </div>
-	<div class="square black_square"> </div>
-	<div class="square white_square"> </div>
-	<div class="square black_square"> </div>
-	<div class="square white_square"> </div>
-	<div class="clear_float"> </div>
-
-	<div class="square white_square"> </div>
-	<div class="square black_square"> </div>
-	<div class="square white_square"> </div>
-	<div class="square black_square"> </div>
-	<div class="square white_square"> </div>
-	<div class="square black_square"> </div>
-	<div class="square white_square"> </div>
-	<div class="square black_square"> </div>
-	<div class="clear_float"> </div>
-
+	<div id="container">
+  <form action="" id="board"></form>
+  <div id="ai-cover"></div>
 </div>
-
-<audio id="moveSound">
-	<source src = "sounds/move.mp3"> 
-</audio>
-<audio id="winSound">
-	<<source src="sounds/win.mp3">
-</audio>
-<script src="script.js" > </script>
-</body>
+<h3>Checkers Rules</h3>
+<blockquote cite="https://en.wikipedia.org/wiki/Checkers">
+  <p>
+    Only dark squares are used. A piece can only move diagonally into an
+    unoccupied square. When capturing an opponent's piece is possible,
+    <em>capturing is mandatory</em>.
+  </p>
+  <p>
+    A man moves one step diagonally forwards and captures an adjacent
+    opponent's piece by jumping over it and landing on the next square.
+    Multiple enemy pieces can be captured in a single turn provided this is
+    done by successive jumps made by a single piece; the jumps do not need
+    to be in the same line and may zigzag. In American checkers, men can
+    jump only forwards.
+  </p>
+  <p>
+    When a man reaches the farthest row forward, it becomes a king. It is
+    marked by crowning.
+    <em>The king has additional powers, including the ability to move and
+      capture backwards</em>. Like a man, a king can make successive jumps in a single turn,
+    provided each jump captures an enemy piece.
+  </p>
+</blockquote>
+<div id="myModal" class="modal">
+  <div class="modal-content">
+    <span class="close">&times;</span>
+    <p id="message"></p>
+    <p><button>Yes</button><button>No</button></p>
+  </div>
+</div>
 </html>
