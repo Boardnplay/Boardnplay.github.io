@@ -3,6 +3,14 @@
     padding: 0;
 }
 
+body , html{
+		transition: 1s ease-in-out;
+		width: 100%;
+		height : 100%;
+		margin : 0 0;
+		padding: 0  0;
+}
+
 body {
     display: grid;
     place-items: center;
