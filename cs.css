@@ -11,6 +11,12 @@ body , html{
 	height: 80px;
 }
 
+ .center {
+                display: block;
+                margin-left: auto;
+                margin-right: auto;
+            }
+
 .white_square{
 	background-color:#F0D2B4;
 }
