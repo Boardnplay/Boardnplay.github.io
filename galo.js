@@ -39,7 +39,7 @@ function updateCell(cell, index){
 }
 function changePlayer(){
     currentPlayer = (currentPlayer == "X") ? "O" : "X";
-    statusText.textContent = `${currentPlayer}'s turn`;
+    statusText.textContent = `Turno: ${currentPlayer}`;
 }
 function checkWinner(){
     let roundWon = false;
@@ -60,11 +60,11 @@ function checkWinner(){
     }
 
     if(roundWon){
-        statusText.textContent = `${currentPlayer} wins!`;
+        statusText.textContent = `${currentPlayer} Ganhou!`;
         running = false;
     }
     else if(!options.includes("")){
-        statusText.textContent = `Draw!`;
+        statusText.textContent = `Empate!`;
         running = false;
     }
     else{
