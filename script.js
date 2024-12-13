@@ -468,7 +468,7 @@ function changeTurns(ckc){
 	innerText = "Turno: Vermelho"
 else
 	the_checker = w_checker;
-	.innerText = "Turno: Preto"
+	innerText = "Turno: Preto"
  }
 
 function checkIfLost(){
