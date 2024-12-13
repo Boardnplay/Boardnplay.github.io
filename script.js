@@ -6,6 +6,7 @@ var square_class = document.getElementsByClassName("square");
 var white_checker_class = document.getElementsByClassName("white_checker");
 var black_checker_class = document.getElementsByClassName("black_checker");
 var table = document.getElementById("table");
+var score = document.getElementById("score");
 var black_background = document.getElementById("black_background");
 var moveSound = document.getElementById("moveSound");
 var winSound = document.getElementById("winSound");
@@ -461,15 +462,12 @@ function attackMoves(ckc){
  	return false;
 }
 
-if (tog % 2 !== 0) {
-            document.getElementById('tog').innerText = "Turno: Branco"
-            whosTurn('W')
-        }
-        if (tog % 2 == 0) {
-            document.getElementById('tog').innerText = "Turno: Preto"
-            whosTurn('B')
-        }
-
+function changeTurns(ckc){
+		if(ckc.color=="white")
+	the_checker = b_checker;
+else
+	the_checker = w_checker;
+ }
 
 function checkIfLost(){
 	var i;
@@ -488,7 +486,22 @@ function  checkForMoves(){
 		}
 	return true;
 }
+
+function declareWinner(){
+	playSound(winSound);
+	black_background.style.display = "inline";
+	score.style.display = "block";
 0
+if(the_checker[1].color == "white")
+	score.innerHTML = "Black wins";
+else
+	score.innerHTML = "Red wins";
+}
+
+function playSound(sound){
+	if(sound) sound.play();
+}
+
 
 function getDimension (){
 	contor ++;
