@@ -465,10 +465,10 @@ function attackMoves(ckc){
 function changeTurns(ckc){
 		if(ckc.color=="white")
 	the_checker = b_checker;
-	innerText = "Turno: Vermelho"
+	changeTurns.innerHTML = "Turno: Vermelho"
 else
 	the_checker = w_checker;
-	innerText = "Turno: Preto"
+	changeTurns.innerHTML = "Turno: Preto"
  }
 
 function checkIfLost(){
@@ -495,15 +495,10 @@ function declareWinner(){
 	score.style.display = "block";
 0
 if(the_checker[1].color == "white")
-	score.innerHTML = "Black wins";
+	score.innerHTML = "Preto Ganhou!!";
 else
-	score.innerHTML = "Red wins";
+	score.innerHTML = "Vermelho Ganhou!!";
 }
-
-function playSound(sound){
-	if(sound) sound.play();
-}
-
 
 function getDimension (){
 	contor ++;
