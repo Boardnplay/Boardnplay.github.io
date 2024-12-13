@@ -489,13 +489,12 @@ function  checkForMoves(){
 
 function declareWinner(){
 	playSound(winSound);
-	black_background.style.display = "inline";
 	score.style.display = "block";
 0
 if(the_checker[1].color == "white")
-	score.innerHTML = "Black wins";
+	score.innerHTML = "Preto Ganhou!";
 else
-	score.innerHTML = "Red wins";
+	score.innerHTML = "Vermelho Ganhou!";
 }
 
 function playSound(sound){
