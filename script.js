@@ -465,10 +465,10 @@ function attackMoves(ckc){
 function changeTurns(ckc){
 		if(ckc.color=="white")
 	the_checker = b_checker;
-	document.getElementById('changeTurns').innerText = "Turno: Vermelho"
+	innerText = "Turno: Vermelho"
 else
 	the_checker = w_checker;
-	document.getElementById('changeTurns').innerText = "Turno: Preto"
+	.innerText = "Turno: Preto"
  }
 
 function checkIfLost(){
