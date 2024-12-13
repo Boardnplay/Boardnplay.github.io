@@ -461,12 +461,15 @@ function attackMoves(ckc){
  	return false;
 }
 
-function changeTurns(ckc){
-		if(ckc.color=="white")
-	the_checker = b_checker;
-else
-	the_checker = w_checker;
- }
+if (tog % 2 !== 0) {
+            document.getElementById('tog').innerText = "Turno: Branco"
+            whosTurn('W')
+        }
+        if (tog % 2 == 0) {
+            document.getElementById('tog').innerText = "Turno: Preto"
+            whosTurn('B')
+        }
+
 
 function checkIfLost(){
 	var i;
