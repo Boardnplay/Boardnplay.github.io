@@ -287,12 +287,6 @@
 			$boardInputs = $board.find("input");
 			$boardInputCandidates = $board.find(".candidates");
 
-            var HTMLSnippet = [
-        		'<a href="https://mczak.com/code/sudoku/" target="_blank">Sudoku HTML</a>'
-			].join('');
-			
-			$board.append(HTMLSnippet);
-
 
 		};
 
