@@ -1,64 +1,46 @@
-const board = document.getElementById('board');
-const currentPlayerDisplay = document.getElementById('currentPlayer');
-const messageDisplay = document.getElementById('message');
-const rollDiceButton = document.getElementById('rollDice');
+// script.js
 
-const players = [
-    { id: 1, position: 0, money: 1500 },
-    { id: 2, position: 0, money: 1500 }
-];
-
-let currentPlayerIndex = 0;
-
+let playerTurn = 1;
+let playerPositions = [0, 0]; // positions of player 1 and player 2
+let playerMoney = [1500, 1500]; // money for player 1 and player 2
 const properties = [
-    { name: "Go", price: 0 },
-    { name: "Mediterranean Avenue", price: 100 },
-    { name: "Community Chest", price: 0 },
-    { name: "Baltic Avenue", price: 100 },
-    { name: "Income Tax", price: 0 },
-    { name: "Reading Railroad", price: 200 },
-    { name: "Oriental Avenue", price: 100 },
-    { name: "Chance", price: 0 },
-    { name: "Vermont Avenue", price: 100 },
-    { name: "Connecticut Avenue", price: 120 },
-    // Add more properties as needed
+    "GO", "Mediterranean Ave.", "Community Chest", "Baltic Ave.", "Income Tax",
+    "Reading Railroad" // Add more properties
 ];
 
-function createBoard() {
-    properties.forEach((property, index) => {
-        const square = document.createElement('div');
-        square.classList.add('square');
-        square.innerText = property.name;
-        square.dataset.index = index;
-        board.appendChild(square);
-    });
+// Function to update player status
+function updatePlayerStatus() {
+    document.getElementById("player-turn").innerText = `Player ${playerTurn}'s Turn`;
+    document.getElementById("player-money").innerText = `Money: $${playerMoney[playerTurn - 1]}`;
 }
 
+// Function to roll the dice
 function rollDice() {
-    const diceRoll = Math.floor(Math.random() * 6) + 1;
-    messageDisplay.innerText = `Player ${players[currentPlayerIndex].id} rolled a ${diceRoll}`;
-    movePlayer(diceRoll);
+    const dice1 = Math.floor(Math.random() * 6) + 1;
+    const dice2 = Math.floor(Math.random() * 6) + 1;
+    document.getElementById("dice1").innerText = dice1;
+    document.getElementById("dice2").innerText = dice2;
+    
+    movePlayer(dice1 + dice2);
 }
 
-function movePlayer(roll) {
-    const player = players[currentPlayerIndex];
-    player.position = (player.position + roll) % properties.length;
-    currentPlayerDisplay.innerText = player.id;
-    checkProperty();
-    currentPlayerIndex = (currentPlayerIndex + 1) % players.length;
-}
-
-function checkProperty() {
-    const player = players[currentPlayerIndex];
-    const property = properties[player.position];
-    if (property.price > 0) {
-        if (player.money >= property.price) {
-            messageDisplay.innerText += ` - You can buy ${property.name} for $${property.price}`;
-        } else {
-            messageDisplay.innerText += ` - You cannot afford ${property.name}`;
-        }
+// Function to move the player
+function movePlayer(steps) {
+    let newPosition = playerPositions[playerTurn - 1] + steps;
+    if (newPosition >= properties.length) {
+        newPosition -= properties.length;
     }
+
+    playerPositions[playerTurn - 1] = newPosition;
+    alert(`Player ${playerTurn} landed on ${properties[newPosition]}`);
+    
+    // Switch to the next player's turn
+    playerTurn = playerTurn === 1 ? 2 : 1;
+    updatePlayerStatus();
 }
 
-rollDiceButton.addEventListener('click', rollDice);
-createBoard();
+// Event listener for the roll dice button
+document.getElementById("roll-dice").addEventListener("click", rollDice);
+
+// Initialize the game
+updatePlayerStatus();
