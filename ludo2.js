@@ -1,5 +1,5 @@
 import { BASE_POSITIONS, HOME_ENTRANCE, HOME_POSITIONS, PLAYERS, SAFE_POSITIONS, START_POSITIONS, STATE, TURNING_POINTS } from './constants.js';
-import { UI } from './UI.js';
+import { UI } from 'ludo3.js';
 
 export class Ludo {
     currentPositions = {
