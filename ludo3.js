@@ -1,4 +1,4 @@
-import { COORDINATES_MAP, PLAYERS, STEP_LENGTH } from './constants.js';
+import { COORDINATES_MAP, PLAYERS, STEP_LENGTH } from 'ludo4.js';
 
 const diceButtonElement = document.querySelector('#dice-btn');
 const playerPiecesElements = {
