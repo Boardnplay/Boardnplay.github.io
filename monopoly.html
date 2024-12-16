@@ -7,14 +7,25 @@
     <link rel="stylesheet" href="monopoly.css">
 </head>
 <body>
-    <div id="game">
+    <div id="game-container">
         <div id="board">
-            <!-- Board squares will be generated here -->
+            <div class="corner" id="go">GO</div>
+            <div class="property" id="mediterranean">Mediterranean Ave.</div>
+            <div class="property" id="community-chest1">Community Chest</div>
+            <div class="property" id="baltic">Baltic Ave.</div>
+            <div class="corner" id="income-tax">Income Tax</div>
+            <div class="property" id="reading-railroad">Reading Railroad</div>
+            <!-- Add other properties, chance cards, and corners as needed -->
         </div>
-        <div id="info">
-            <h2>Player: <span id="currentPlayer">1</span></h2>
-            <button id="rollDice">Roll Dice</button>
-            <div id="message"></div>
+        <div id="player-info">
+            <div id="player-status">
+                <p id="player-turn">Player 1's Turn</p>
+                <p id="player-money">Money: $1500</p>
+            </div>
+            <button id="roll-dice">Roll Dice</button>
+            <div id="dice-roll">
+                <span id="dice1">-</span> + <span id="dice2">-</span>
+            </div>
         </div>
     </div>
     <script src="monopoly.js"></script>
