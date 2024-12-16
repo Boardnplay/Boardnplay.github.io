@@ -1,0 +1,36 @@
+body {
+    font-family: Arial, sans-serif;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    height: 100vh;
+    background-color: #f0f0f0;
+}
+
+#game {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+}
+
+#board {
+    width: 400px;
+    height: 400px;
+    display: grid;
+    grid-template-columns: repeat(10, 1fr);
+    grid-template-rows: repeat(10, 1fr);
+    border: 2px solid #333;
+    position: relative;
+}
+
+.square {
+    border: 1px solid #ccc;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    background-color: #fff;
+}
+
+#info {
+    margin-top: 20px;
+}
