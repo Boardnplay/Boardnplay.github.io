@@ -28,25 +28,24 @@
 	
 <div class="wrap">
 		
-<!--show candidates toggle-->
 <label for="toggleCandidates"> Ajudas: </label>
 <input id="toggleCandidates" class="js-candidate-toggle" type="checkbox"/>
-<!--generate board buttons-->
+
 Novo:
 <button type="button" class="sudokubutton1 js-generate-board-btn--easy">Fácil</button>
 <button type="button" class="sudokubutton2 js-generate-board-btn--medium">Médio</button>
 <button type="button" class="sudokubutton3 js-generate-board-btn--hard">Difícil</button>
 <button type="button" class="sudokubutton4 js-generate-board-btn--very-hard">Muito Difícil</button>
 
-<!--the only required html-->
+
 <div id="sudoku" class="sudoku-board">
 </div>
 
-<!--solve buttons-->
+
 Resolver: <button type="button" class="sudokubutton5 js-solve-step-btn"> 1 Passo </button>
 <button type="button" class="sudokubutton6 js-solve-all-btn"> Todos </button>
 <br>
-<!--clear board btn-->
+
 <button type="button" class="sudokubutton7 js-clear-board-btn"> Apagar </button>
 </div>
 	<script>
@@ -62,7 +61,7 @@ Resolver: <button type="button" class="sudokubutton5 js-solve-step-btn"> 1 Passo
  
  mySudokuJS = $("#sudoku").sudokuJS({
   difficulty: "very hard"
-  //change state of our candidate showing checkbox on change in sudokuJS
+
   ,candidateShowToggleFn : function(showing){
    $candidateToggle.prop("checked", showing);
   }
