@@ -14,7 +14,7 @@ body , html{
 a {
                 color: blue;
                 text-decoration: none;
-	font-family: 'Comic Sans MS';
+				font-family: 'Comic Sans MS';
             }
 
 .white_square{
@@ -119,4 +119,5 @@ a {
 		height: 32px;
 	}
 }
+
 
