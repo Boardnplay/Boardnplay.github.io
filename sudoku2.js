@@ -996,7 +996,7 @@
 		};
 		return{solveAll:solveAll,solveStep:solveStep,analyzeBoard:analyzeBoard,clearBoard:clearBoard,getBoard:getBoard,setBoard:setBoard,hideCandidates:hideCandidates,showCandidates:showCandidates,setEditingCandidates:setEditingCandidates,generateBoard:generateBoard};
 	};
-})(window,jQuery);
+)(window,jQuery);
 var $candidateToggle = $(".js-candidate-toggle"),
  $generateBoardBtnEasy = $(".js-generate-board-btn--easy"),
  $generateBoardBtnMedium = $(".js-generate-board-btn--medium"),
@@ -1039,3 +1039,4 @@ var $candidateToggle = $(".js-candidate-toggle"),
    mySudokuJS.hideCandidates();
  });
  $candidateToggle.trigger("change");
+}
