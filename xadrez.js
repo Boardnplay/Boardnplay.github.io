@@ -1,4 +1,3 @@
-// Inserting the Images
 function insertImage() {
 
     document.querySelectorAll('.box').forEach(image => {
@@ -21,8 +20,6 @@ function insertImage() {
 insertImage()
 
 
-//Coloring
-
 function coloring() {
     const color = document.querySelectorAll('.box')
 
@@ -41,21 +38,12 @@ function coloring() {
         if (a % 2 !== 0) {
             color.style.backgroundColor = 'rgb(100, 75, 43)'
         }
-        // if (a % 2 == 0) {
-        //     color.style.backgroundColor = 'seagreen'
-        // }
-        // if (a % 2 !== 0) {
-        //     color.style.backgroundColor = 'lime'
-        // }
 
     })
 }
 coloring()
 
 
-
-
-//function to not remove the same team element
 
 function reddish() {
     document.querySelectorAll('.box').forEach(i1 => {
@@ -87,9 +75,6 @@ function reddish() {
                         i2.style.backgroundColor = 'rgb(100, 75, 43)'
                     }
 
-                    // if (pinkColor == greenColor) {
-                    //     i2.style.backgroundColor = 'rgb(253, 60, 60)'
-                    // }
                 }
             })
         }
@@ -114,8 +99,6 @@ document.querySelectorAll('.box').forEach(item => {
 
 
     item.addEventListener('click', function () {
-
-        // To delete the opposite element
 
         if (item.style.backgroundColor == 'green' && item.innerText.length == 0) {
             tog = tog + 1
@@ -152,12 +135,7 @@ document.querySelectorAll('.box').forEach(item => {
         a = aside + aup
 
 
-
-        // Function to display the available paths for all pieces
-
         function whosTurn(toggle) {
-
-            // PAWN
 
             if (item.innerText == `${toggle}pawn`) {
                 item.style.backgroundColor = 'pink'
@@ -183,19 +161,7 @@ document.querySelectorAll('.box').forEach(item => {
                         document.getElementById(`b${a + 100 - 1}`).style.backgroundColor = 'green'
 
                     }
-                    // if (aup == 800) {
-                    //     document.getElementById(`b${a}`).innerText = 'Wqueen'
-                    //     coloring()
-                    //     insertImage()
-                    // }
-                    // if (aside < 8 && document.getElementById(`b${a + 100 + 1}`).innerText.length == 0 && document.getElementById(`b${a + 100}`).innerText.length == 0) {
-                    //     document.getElementById(`b${a + 100}`).style.backgroundColor = 'green'
-                    // }
-
-                    // if (aside > 1 && document.getElementById(`b${a + 100 - 1}`).innerText.length == 0 && document.getElementById(`b${a + 100}`).innerText.length == 0) {
-                    //     document.getElementById(`b${a + 100}`).style.backgroundColor = 'green'
-
-                    // }
+                   
                 }
 
                 if (tog % 2 == 0 && aup > 100) {
@@ -221,8 +187,6 @@ document.querySelectorAll('.box').forEach(item => {
 
 
             }
-
-            // KING
 
             if (item.innerText == `${toggle}king`) {
 
@@ -283,8 +247,6 @@ document.querySelectorAll('.box').forEach(item => {
             }
 
 
-            // ROOK
-
             if (item.innerText == `${toggle}rook`) {
 
                 for (let i = 1; i < 9; i++) {
@@ -334,9 +296,6 @@ document.querySelectorAll('.box').forEach(item => {
                 item.style.backgroundColor = 'pink'
             }
 
-
-
-            // BISHOP
 
             if (item.innerText == `${toggle}bishop`) {
 
@@ -390,10 +349,6 @@ document.querySelectorAll('.box').forEach(item => {
                 item.style.backgroundColor = 'pink'
 
             }
-
-
-
-            // QUEEN
 
             if (item.innerText == `${toggle}queen`) {
 
@@ -494,7 +449,6 @@ document.querySelectorAll('.box').forEach(item => {
 
             }
 
-            // KNIGHT
 
             if (item.innerText == `${toggle}knight`) {
 
@@ -530,8 +484,6 @@ document.querySelectorAll('.box').forEach(item => {
         }
 
 
-        // Toggling the turn
-
         if (tog % 2 !== 0) {
             document.getElementById('tog').innerText = "Turno: Branco"
             whosTurn('W')
@@ -542,10 +494,6 @@ document.querySelectorAll('.box').forEach(item => {
         }
 
         reddish()
-
-
-
-        // winning()
 
         numOfKings = 0
 
@@ -559,7 +507,6 @@ document.querySelectorAll('.box').forEach(item => {
 
         if (numOfKings == 1) {
             setTimeout(() => {
-                // console.log(`${toggle}`) 
                 if (tog % 2 == 0) {
                     alert('Branco Ganhou!!')
                     location.reload()
@@ -578,10 +525,6 @@ document.querySelectorAll('.box').forEach(item => {
 })
 
 
-
-
-
-// Moving the element
 document.querySelectorAll('.box').forEach(item => {
 
     item.addEventListener('click', function () {
@@ -694,10 +637,6 @@ document.querySelectorAll('.box').forEach(item => {
 
 
 
-
-
-
-// Prvents from selecting multiple elements
 z = 0
 document.querySelectorAll('.box').forEach(ee => {
     ee.addEventListener('click', function () {
