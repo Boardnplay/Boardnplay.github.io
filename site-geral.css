@@ -189,41 +189,27 @@ button:hover {
     transition: background-color 0.3s;
 }
 
-.cell:nth-child(3n) {
-    border-right: none;
-}
+.cell:nth-child(3n) { border-right: none; }
+.cell:nth-child(n+7) { border-bottom: none; }
+.cell:nth-child(3n+1) { border-left: none; }
+.cell:nth-child(-n+3) { border-top: none; }
+.cell:hover { background-color: #bdc3c7; }
 
-.cell:nth-child(n+7) {
-    border-bottom: none;
-}
-
-.cell:nth-child(3n+1) {
-    border-left: none;
-}
-
-.cell:nth-child(-n+3) {
-    border-top: none;
-}
-
-.cell:hover {
-    background-color: #bdc3c7;
-}
-
-/* DAMAS STYLES */
+/* DAMAS STYLES - CORRIGIDO */
 
 .checker-board {
-    position: relative;
+    display: grid;
+    grid-template-columns: repeat(8, 60px);
+    grid-template-rows: repeat(8, 60px);
     width: 480px;
     height: 480px;
     margin: 20px auto;
     border: 4px solid #333;
     box-shadow: 0 0 20px rgba(0, 0, 0, 0.3);
+    position: relative; /* Mantido para posicionamento das peças */
 }
 
 .square {
-    float: left;
-    width: 60px;
-    height: 60px;
     display: flex;
     justify-content: center;
     align-items: center;
@@ -231,19 +217,13 @@ button:hover {
     transition: background-color 0.1s, box-shadow 0.1s;
     font-size: 0;
     list-style: none;
+    width: 100%;
+    height: 100%;
 }
 
-.white_square {
-    background-color: #F0D2B4;
-}
-
-.black_square {
-    background-color: #BA7A3A;
-}
-
-.clear_float {
-    clear: both;
-}
+.white_square { background-color: #F0D2B4; }
+.black_square { background-color: #BA7A3A; }
+.clear_float { display: none; } /* Já não é necessário */
 
 .checker {
     width: 50px;
@@ -283,7 +263,7 @@ button:hover {
     box-shadow: 0 0 20px rgba(0, 0, 0, 0.5);
 }
 
-/* XADREZ STYLES */
+/* XADREZ STYLES - CORRIGIDO */
 
 .chess-board {
     width: 480px;
@@ -295,9 +275,7 @@ button:hover {
     flex-direction: column-reverse;
 }
 
-.divv {
-    display: flex;
-}
+.divv { display: flex; }
 
 .box {
     width: 60px;
@@ -318,7 +296,6 @@ button:hover {
 #row7 .box:nth-child(odd), #row5 .box:nth-child(odd), #row3 .box:nth-child(odd), #row1 .box:nth-child(odd) { background-color: #F0D2B4; }
 #row7 .box:nth-child(even), #row5 .box:nth-child(even), #row3 .box:nth-child(even), #row1 .box:nth-child(even) { background-color: #BA7A3A; }
 
-
 .box::before {
     font-family: 'Helvetica', 'Arial', sans-serif;
     font-size: 45px;
@@ -327,7 +304,6 @@ button:hover {
     text-align: center;
     width: 100%;
 }
-
 
 .Wrook::before, .Wknight::before, .Wbishop::before, .Wqueen::before, .Wking::before, .Wpawn::before {
     color: white;
@@ -339,39 +315,37 @@ button:hover {
     text-shadow: 1px 1px 2px #FFF;
 }
 
-.Wrook::before { content: "\u2656"; }
-.Wknight::before { content: "\u2658"; }
-.Wbishop::before { content: "\u2657"; }
-.Wqueen::before { content: "\u2655"; }
-.Wking::before { content: "\u2654"; }
-.Wpawn::before { content: "\u2659"; }
+/* Códigos Unicode Corrigidos */
+.Wrook::before   { content: "\2656"; }
+.Wknight::before { content: "\2658"; }
+.Wbishop::before { content: "\2657"; }
+.Wqueen::before  { content: "\2655"; }
+.Wking::before   { content: "\2654"; }
+.Wpawn::before   { content: "\2659"; }
 
-.Brook::before { content: "\u265C"; }
-.Bknight::before { content: "\u265E"; }
-.Bbishop::before { content: "\u265D"; }
-.Bqueen::before { content: "\u265B"; }
-.Bking::before { content: "\u265A"; }
-.Bpawn::before { content: "\u265F"; }
+.Brook::before   { content: "\265C"; }
+.Bknight::before { content: "\265E"; }
+.Bbishop::before { content: "\265D"; }
+.Bqueen::before  { content: "\265B"; }
+.Bking::before   { content: "\265A"; }
+.Bpawn::before   { content: "\265F"; }
 
-/* SUDOKU STYLES */
+/* SUDOKU STYLES - CORRIGIDO */
 
 .sudoku-board {
-    min-height: 22.75rem;
+    display: grid;
+    grid-template-columns: repeat(9, 53.33333px);
     margin-top: 3px;
     margin-bottom: 1em;
-    display: inline-block;
     border: 2px solid #333;
     box-shadow: 0 0 15px rgba(0, 0, 0, 0.2);
 }
 
 .sudoku-board-cell {
-    display: inline-block;
-    position: relative;
     border: 1px solid #ddd;
     background: white;
     width: 53.33333px;
     height: 53.33333px;
-    vertical-align: top;
     text-align: center;
     font-size: 2em;
     line-height: 50px;
@@ -387,25 +361,28 @@ button:hover {
     font-weight: bold;
     color: #333;
     background: transparent;
+    padding: 0; /* Remove padding que pode desalinhar */
 }
 
 .sudoku-board-cell:nth-of-type(9n+1) {
     border-left-width: 2px;
     border-left-color: #808080;
 }
-
-.sudoku-board-cell:nth-of-type(n):nth-of-type(-n+9) {
+.sudoku-board-cell:nth-of-type(-n+9) { /* Alterado para abranger apenas a primeira linha */
     border-top-width: 2px;
     border-top-color: #808080;
 }
-
 .sudoku-board-cell:nth-of-type(3n) {
     border-right-width: 2px;
     border-right-color: #808080;
 }
-
 .sudoku-board-cell:nth-of-type(n+19):nth-of-type(-n+27),
 .sudoku-board-cell:nth-of-type(n+46):nth-of-type(-n+54) {
+    border-bottom-width: 2px;
+    border-bottom-color: #808080;
+}
+/* Adiciona a borda inferior para a última linha */
+.sudoku-board-cell:nth-of-type(n+73):nth-of-type(-n+81) {
     border-bottom-width: 2px;
     border-bottom-color: #808080;
 }
@@ -439,67 +416,89 @@ button:hover {
 .sudokubutton7 { background-color: #899db6; }
 
 /* RESPONSIVIDADE (MOBILE) - Abaixo de 768px */
-
 @media (max-width: 768px) {
     .site-header {
         flex-direction: column;
         height: auto;
         padding: 10px;
     }
-
     .main-nav ul {
         flex-wrap: wrap;
         justify-content: center;
         margin-top: 10px;
     }
-
-    .main-nav ul li {
-        margin: 5px 10px;
-    }
-
-    body {
-        padding-top: 120px;
-    }
+    .main-nav ul li { margin: 5px 10px; }
+    body { padding-top: 120px; }
 
     /* GALO - Reduz de 60px para 40px */
-    #cellContainer {
-        width: 120px;
-    }
-
-    .cell {
-        width: 40px;
-        height: 40px;
-        line-height: 40px;
-        font-size: 30px;
-    }
+    #cellContainer { width: 120px; }
+    .cell { width: 40px; height: 40px; line-height: 40px; font-size: 30px; }
 
     /* DAMAS / XADREZ - Reduz de 60px para 40px */
     .checker-board, .chess-board {
         width: 320px;
         height: 320px;
     }
-
-    .square, .box {
-        width: 40px;
-        height: 40px;
+    .checker-board {
+        grid-template-columns: repeat(8, 40px);
+        grid-template-rows: repeat(8, 40px);
     }
-
-    .checker {
-        width: 36px;
-        height: 36px;
-        border: 2px solid white;
-    }
-
-    .box::before {
-        font-size: 30px;
-        line-height: 40px;
-    }
+    .square, .box { width: 40px; height: 40px; }
+    .checker { width: 36px; height: 36px; border: 2px solid white; }
+    .box::before { font-size: 30px; line-height: 40px; }
 
     /* SUDOKU - Reduz o tamanho da célula */
+    .sudoku-board {
+        grid-template-columns: repeat(9, 35.55555px);
+    }
     .sudoku-board-cell {
         width: 35.55555px;
         height: 35.55555px;
         font-size: 1.5em;
         line-height: 34px;
     }
+/* ESTILOS ADICIONAIS PARA XADREZ (PROMOÇÃO E ALERTA) */
+
+#promotion-dialog {
+    position: absolute;
+    background-color: #f0f0f0;
+    border: 3px solid #2c3e50;
+    border-radius: 10px;
+    padding: 20px;
+    z-index: 10;
+    box-shadow: 0 0 20px rgba(0,0,0,0.5);
+    display: flex;
+    gap: 10px;
+    flex-direction: column;
+    align-items: center;
+}
+
+#promotion-dialog h3 {
+    margin-bottom: 10px;
+    color: #2c3e50;
+}
+
+#promotion-dialog .box {
+    width: 60px;
+    height: 60px;
+    background-color: #ccc;
+    cursor: pointer;
+    border-radius: 5px;
+}
+
+#game-over-alert {
+    position: absolute;
+    background-color: rgba(44, 62, 80, 0.9);
+    color: white;
+    padding: 30px;
+    border-radius: 15px;
+    z-index: 10;
+    text-align: center;
+    box-shadow: 0 0 25px rgba(0,0,0,0.7);
+}
+
+#game-over-alert h2 {
+    margin-bottom: 15px;
+    font-size: 2em;
+}
 }
