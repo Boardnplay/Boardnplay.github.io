@@ -1,453 +1,292 @@
-document.addEventListener('DOMContentLoaded', () => {
-    const boxes = document.querySelectorAll(".box");
-    const tog = document.getElementById("tog");
-    const undoBtn = document.getElementById("undoBtn");
-    const gameArea = document.querySelector(".game-area");
+/* damas.js
+   Implementação de damas (checkers) jogável + IA simples.
+   Regras simplificadas:
+   - Tabuleiro 8x8, peças só nas casas escuras.
+   - Movimento diagonal simples para frente (capturas podem pular e várias capturas em sequência são permitidas).
+   - Promoção a dama (king) ao chegar à última linha.
+   - IA que prioriza capturas; caso contrário faz movimento aleatório.
+*/
 
-    let boardState = {};
-    let turn = "white";
-    let selectedBox = null;
-    let history = [];
-    let isGameOver = false;
-
-    // Estado para regras especiais
-    let castlingRights = { w: { k: true, q: true }, b: { k: true, q: true } };
-    let enPassantTarget = null; // Ex: 'b304'
-
-    function initializeGame() {
-        boxes.forEach(box => {
-            const pieceClass = Array.from(box.classList).find(cls => cls.startsWith('W') || cls.startsWith('B'));
-            boardState[box.id] = pieceClass || null;
-            box.addEventListener("click", handleBoxClick);
-        });
-        undoBtn.addEventListener("click", undoMove);
-        saveHistory();
-        updateTurnIndicator();
+(function(){
+  // Garante existência do board .checker-board
+  const ensureBoard = () => {
+    let board = document.querySelector('.checker-board');
+    if (!board) {
+      const main = document.querySelector('.main-content') || document.body;
+      board = document.createElement('div');
+      board.className = 'checker-board';
+      main.appendChild(board);
     }
+    board.innerHTML = '';
+    return board;
+  };
 
-    function handleBoxClick(event) {
-        if (isGameOver) return;
-        const clickedBox = event.currentTarget;
-        const piece = boardState[clickedBox.id];
-        const pieceColor = piece ? (piece.startsWith('W') ? 'white' : 'black') : null;
+  const boardEl = ensureBoard();
 
-        if (selectedBox) {
-            // Se o clique for num movimento válido, executa-o
-            if (clickedBox.classList.contains('highlight')) {
-                makeMove(selectedBox, clickedBox);
-            } else { // Senão, deseleciona e talvez seleciona outra peça
-                removeHighlightsAndSelection();
-                if (pieceColor === turn) {
-                    selectPiece(clickedBox);
-                }
-            }
-        } else if (pieceColor === turn) {
-            selectPiece(clickedBox);
+  const status = document.getElementById('statusText') || (() => {
+    const el = document.createElement('h2');
+    el.id = 'statusText';
+    const container = boardEl.parentElement || document.body;
+    container.insertBefore(el, boardEl);
+    return el;
+  })();
+
+  const ctrlContainer = document.createElement('div');
+  ctrlContainer.style.textAlign = 'center';
+  ctrlContainer.style.marginTop = '10px';
+
+  const restartBtn = document.getElementById('restartBtn') || (() => {
+    const b = document.createElement('button');
+    b.id = 'restartBtn';
+    b.textContent = 'Recomeçar Damas';
+    ctrlContainer.appendChild(b);
+    boardEl.parentElement.appendChild(ctrlContainer);
+    return b;
+  })();
+
+  const aiToggle = document.createElement('button');
+  aiToggle.textContent = 'IA: OFF (pretas)';
+  aiToggle.style.marginLeft = '10px';
+  ctrlContainer.appendChild(aiToggle);
+
+  // estado
+  let board = new Array(8).fill(null).map(()=>new Array(8).fill(null));
+  let squares = [];
+  let selected = null;
+  let turn = 'w'; // w = brancas (top? escolhi brancas em baixo), b = pretas
+  let aiEnabled = false;
+  let mustContinueCapture = null; // se uma peça fez captura e deve continuar
+
+  // peças: { color:'w'|'b', king: boolean }
+
+  function resetBoard(){
+    board = new Array(8).fill(null).map(()=>new Array(8).fill(null));
+    // preencher peças (tradicional: 3 filas de cada lado)
+    for(let r=0;r<3;r++){
+      for(let c=0;c<8;c++){
+        if((r+c)%2 === 1) board[r][c] = {color:'b', king:false};
+      }
+    }
+    for(let r=5;r<8;r++){
+      for(let c=0;c<8;c++){
+        if((r+c)%2 ===1) board[r][c] = {color:'w', king:false};
+      }
+    }
+    selected = null; turn = 'w'; mustContinueCapture = null; render(); setStatus('Vez: Brancas');
+  }
+
+  function setStatus(s){ status.textContent = s; }
+
+  function render(){
+    boardEl.innerHTML = '';
+    squares = [];
+    for(let r=0;r<8;r++){
+      for(let c=0;c<8;c++){
+        const sq = document.createElement('div');
+        sq.className = 'square ' + ((r+c)%2===0 ? 'white_square' : 'black_square');
+        sq.dataset.r = r; sq.dataset.c = c;
+        if(board[r][c]){
+          const piece = document.createElement('div');
+          piece.className = 'checker ' + (board[r][c].color==='w' ? 'white_checker' : 'black_checker');
+          if(board[r][c].king) piece.textContent = 'K';
+          piece.style.top = (r*0) + 'px'; // absolute used in original css, keep simple
+          sq.appendChild(piece);
         }
+        sq.addEventListener('click', onSquareClick);
+        boardEl.appendChild(sq);
+        squares.push(sq);
+      }
     }
+  }
 
-    function selectPiece(box) {
-        removeHighlightsAndSelection();
-        selectedBox = box;
-        selectedBox.classList.add('selected');
-        const legalMoves = getLegalMovesForPiece(box.id);
-        legalMoves.forEach(id => document.getElementById(id)?.classList.add('highlight'));
+  function inBounds(r,c){ return r>=0 && r<8 && c>=0 && c<8; }
+
+  // Gera movimentos simples e capturas para uma peça (retorna {moves:[], captures:[]})
+  function pieceMoves(r,c){
+    const p = board[r][c];
+    if(!p) return {moves:[], captures:[]};
+    const dir = (p.color==='w') ? -1 : 1;
+    const moves = [], captures = [];
+    const deltas = p.king ? [[1,1],[1,-1],[-1,1],[-1,-1]] : [[dir,1],[dir,-1]];
+    // simples
+    for(const [dr,dc] of deltas){
+      const nr=r+dr, nc=c+dc;
+      if(inBounds(nr,nc) && !board[nr][nc]) moves.push([nr,nc]);
     }
+    // capturas (single jump)
+    for(const [dr,dc] of deltas){
+      const mr = r+dr, mc = c+dc;
+      const jr = r+2*dr, jc = c+2*dc;
+      if(inBounds(jr,jc) && board[mr][mc] && board[mr][mc].color !== p.color && !board[jr][jc]){
+        captures.push([jr,jc, mr, mc]); // destino e peça capturada pos
+      }
+    }
+    return {moves, captures};
+  }
 
-    function makeMove(fromBox, toBox) {
-        saveHistory();
+  // find all possible moves for color, but if any captures exist, only returns capture moves (forced capture)
+  function allMovesFor(color){
+    const res = [];
+    for(let r=0;r<8;r++) for(let c=0;c<8;c++){
+      const p = board[r][c];
+      if(p && p.color===color){
+        const pm = pieceMoves(r,c);
+        if(pm.captures.length) res.push({from:[r,c], captures: pm.captures});
+        else if(pm.moves.length) res.push({from:[r,c], moves: pm.moves});
+      }
+    }
+    // if any captures exist, keep only capture entries
+    const anyCapture = res.some(e => e.captures && e.captures.length);
+    if(anyCapture) return res.filter(e => e.captures && e.captures.length);
+    return res;
+  }
 
-        const fromId = fromBox.id;
-        const toId = toBox.id;
-        const piece = boardState[fromId];
-        const capturedPiece = boardState[toId];
-        const pieceColor = piece.startsWith('W') ? 'w' : 'b';
-        const { row: toRow } = getCoordinates(toId);
-
-        // --- Lógica de Movimentos Especiais ---
-
-        // 1. En Passant
-        if (piece.endsWith('pawn') && toId === enPassantTarget) {
-            const capturedPawnRow = pieceColor === 'w' ? toRow - 1 : toRow + 1;
-            const capturedPawnId = getIdFromCoordinates(capturedPawnRow, getCoordinates(toId).col);
-            boardState[capturedPawnId] = null;
+  function onSquareClick(e){
+    if(turn !== 'w' && aiEnabled) return; // bloquear cliques enquanto IA espera (se quiseres)
+    const r = parseInt(this.dataset.r), c = parseInt(this.dataset.c);
+    const p = board[r][c];
+    // Se estás em modo de continuar captura obrigatório
+    if(mustContinueCapture){
+      const [sr,sc] = mustContinueCapture;
+      if(sr===r && sc===c){
+        selected = [r,c];
+        highlight();
+      } else if(selected){
+        // tentamos realizar captura adicional
+        const pm = pieceMoves(selected[0], selected[1]);
+        const cap = pm.captures.find(cc => cc[0]===r && cc[1]===c);
+        if(cap){
+          doCapture(selected, [r,c], [cap[2],cap[3]]);
         }
-
-        // 2. Promoção de Peão
-        const promotionRank = pieceColor === 'w' ? 8 : 1;
-        if (piece.endsWith('pawn') && toRow === promotionRank) {
-            showPromotionDialog(toId);
-            // O resto da lógica (trocar turno, etc.) continua em handlePromotionChoice
-        }
-        
-        // 3. Roque (Castling)
-        if (piece.endsWith('king') && Math.abs(getCoordinates(fromId).col - getCoordinates(toId).col) === 2) {
-            const isKingSide = getCoordinates(toId).col === 7;
-            const rookFromCol = isKingSide ? 8 : 1;
-            const rookToCol = isKingSide ? 6 : 4;
-            const rookId = getIdFromCoordinates(toRow, rookFromCol);
-            const rookToId = getIdFromCoordinates(toRow, rookToCol);
-            boardState[rookToId] = boardState[rookId];
-            boardState[rookId] = null;
-        }
-
-        // Atualiza o estado do tabuleiro
-        boardState[toId] = piece;
-        boardState[fromId] = null;
-
-        // --- Atualiza o estado para regras especiais ---
-
-        // 1. Resetar alvo de en passant
-        enPassantTarget = null;
-        if (piece.endsWith('pawn') && Math.abs(getCoordinates(fromId).row - toRow) === 2) {
-            enPassantTarget = getIdFromCoordinates(pieceColor === 'w' ? toRow - 1 : toRow + 1, getCoordinates(toId).col);
-        }
-
-        // 2. Atualizar direitos de roque
-        if (piece.endsWith('king')) {
-            castlingRights[pieceColor].k = false;
-            castlingRights[pieceColor].q = false;
-        }
-        if (fromId === 'b101' || toId === 'b101') castlingRights.w.q = false;
-        if (fromId === 'b108' || toId === 'b108') castlingRights.w.k = false;
-        if (fromId === 'b801' || toId === 'b801') castlingRights.b.q = false;
-        if (fromId === 'b808' || toId === 'b808') castlingRights.b.k = false;
-
-        // Finaliza a jogada
-        removeHighlightsAndSelection();
-        updateBoardUI();
-
-        // Se não for uma promoção, troca o turno e verifica o fim do jogo
-        if (!(piece.endsWith('pawn') && toRow === promotionRank)) {
-            changeTurn();
-        }
+      }
+      return;
     }
 
-    function changeTurn() {
-        turn = turn === 'white' ? 'black' : 'white';
-        updateTurnIndicator();
-        checkForGameOver();
+    if(selected){
+      // se destino é captura possível
+      const pm = pieceMoves(selected[0], selected[1]);
+      const cap = pm.captures.find(cc => cc[0]===r && cc[1]===c);
+      if(cap){
+        doCapture(selected, [r,c], [cap[2],cap[3]]);
+        return;
+      }
+      // movimentos simples
+      const mv = pm.moves.find(m => m[0]===r && m[1]===c);
+      if(mv){
+        movePiece(selected, [r,c]);
+        selected = null; highlight();
+        return;
+      }
+      // selecionar outra peça sua
+      if(p && p.color === turn){
+        selected = [r,c]; highlight();
+      } else {
+        selected = null; highlight();
+      }
+    } else {
+      if(p && p.color===turn){
+        selected = [r,c]; highlight();
+      }
     }
-    
-    // ===============================================
-    // LÓGICA DE VALIDAÇÃO DE JOGADAS (XEQUE, XEQUE-MATE)
-    // ===============================================
+  }
 
-    function getLegalMovesForPiece(pieceId) {
-        const piece = boardState[pieceId];
-        const pseudoLegalMoves = getPseudoLegalMoves(pieceId, piece);
-        const legalMoves = [];
-
-        pseudoLegalMoves.forEach(moveId => {
-            // Simula a jogada
-            const tempState = { ...boardState };
-            tempState[moveId] = tempState[pieceId];
-            tempState[pieceId] = null;
-
-            // Se o rei não estiver em xeque após a jogada, ela é legal
-            if (!isKingInCheck(turn, tempState)) {
-                legalMoves.push(moveId);
-            }
-        });
-        return legalMoves;
+  function highlight(){
+    squares.forEach(s => s.style.outline = '');
+    if(selected){
+      const idx = selected[0]*8 + selected[1];
+      squares[idx].style.outline = '3px solid gold';
     }
+  }
 
-    function getAllLegalMovesForColor(color, board) {
-        const allMoves = [];
-        for (const id in board) {
-            const piece = board[id];
-            if (piece && (piece.startsWith('W') ? 'white' : 'black') === color) {
-                const legalMoves = getLegalMovesForPiece(id);
-                if (legalMoves.length > 0) {
-                    allMoves.push(...legalMoves);
-                }
-            }
-        }
-        return allMoves;
+  function movePiece(from, to){
+    const [fr,fc]=from, [tr,tc]=to;
+    const p = board[fr][fc];
+    board[tr][tc] = p;
+    board[fr][fc] = null;
+    // promoção
+    if(p.color==='w' && tr===0) p.king = true;
+    if(p.color==='b' && tr===7) p.king = true;
+    render();
+    endTurn();
+  }
+
+  function doCapture(from,to,capturedPos){
+    const [fr,fc]=from, [tr,tc]=to;
+    const [cr,cc]=capturedPos;
+    const p = board[fr][fc];
+    board[tr][tc] = p;
+    board[fr][fc] = null;
+    board[cr][cc] = null;
+    // promoção
+    if(p.color==='w' && tr===0) p.king = true;
+    if(p.color==='b' && tr===7) p.king = true;
+    render();
+    // verificar se a peça pode capturar de novo (multi jump)
+    const pm = pieceMoves(tr,tc);
+    if(pm.captures.length){
+      mustContinueCapture = [tr,tc];
+      selected = [tr,tc];
+      setStatus(`${turn==='w' ? 'Brancas' : 'Pretas'} capturou! Continua com a mesma peça.`);
+      highlight();
+      // se AI for quem está a jogar e é a sua vez, AI deverá continuar (tratado em AI)
+    } else {
+      mustContinueCapture = null;
+      selected = null;
+      endTurn();
     }
+  }
 
-    function isKingInCheck(kingColor, board) {
-        const kingId = Object.keys(board).find(id => board[id] === (kingColor === 'white' ? 'Wking' : 'Bking'));
-        if (!kingId) return false;
-        
-        const opponentColor = kingColor === 'white' ? 'black' : 'white';
-        for (const id in board) {
-            const piece = board[id];
-            if (piece && (piece.startsWith('W') ? 'white' : 'black') === opponentColor) {
-                const moves = getPseudoLegalMoves(id, piece, true); // Get attack moves
-                if (moves.includes(kingId)) {
-                    return true;
-                }
-            }
-        }
-        return false;
+  function endTurn(){
+    // alterna turnos
+    turn = (turn==='w'?'b':'w');
+    selected = null; mustContinueCapture = null;
+    render();
+    setStatus(`Vez: ${turn==='w'?'Brancas':'Pretas'}`);
+    // verificar fim de jogo
+    const moves = allMovesFor(turn);
+    if(moves.length===0){
+      setStatus(`Fim de jogo. ${turn==='w' ? 'Pretas' : 'Brancas'} vencem!`);
+      return;
     }
-    
-    function checkForGameOver() {
-        const legalMoves = getAllLegalMovesForColor(turn, boardState);
-        if (legalMoves.length === 0) {
-            isGameOver = true;
-            if (isKingInCheck(turn, boardState)) {
-                const winner = turn === 'white' ? 'Preto' : 'Branco';
-                showAlert(`${winner} ganhou por Xeque-Mate!`);
-            } else {
-                showAlert('Empate por Afogamento (Stalemate)!');
-            }
-        }
+    if(aiEnabled && turn==='b'){
+      setTimeout(()=> runAI(), 300);
     }
+  }
 
-    // ===============================================
-    // GERAÇÃO DE MOVIMENTOS (PSEUDO-LEGAIS)
-    // ===============================================
-
-    function getPseudoLegalMoves(fromId, piece, forAttacksOnly = false) {
-        if (!piece) return [];
-        const type = piece.substring(1).toLowerCase();
-        switch (type) {
-            case 'pawn': return getPawnMoves(fromId, piece, forAttacksOnly);
-            case 'rook': return getLinearMoves(fromId, [[1, 0], [-1, 0], [0, 1], [0, -1]]);
-            case 'knight': return getKnightMoves(fromId);
-            case 'bishop': return getLinearMoves(fromId, [[1, 1], [1, -1], [-1, 1], [-1, -1]]);
-            case 'queen': return [...getLinearMoves(fromId, [[1, 0], [-1, 0], [0, 1], [0, -1]]), ...getLinearMoves(fromId, [[1, 1], [1, -1], [-1, 1], [-1, -1]])];
-            case 'king': return getKingMoves(fromId);
-        }
-        return [];
+  // IA: prioriza capturas; se várias capturas escolhe aleatório; tenta sequências
+  function runAI(){
+    // encontra todos os movimentos (capturas obrigatórias incluídas)
+    const all = allMovesFor('b');
+    if(all.length===0) return endTurn();
+    // se há entradas com captures, escolhe uma
+    const caps = all.filter(e => e.captures && e.captures.length);
+    let chosen;
+    if(caps.length){
+      chosen = caps[Math.floor(Math.random()*caps.length)];
+      // escolhe dentre as capturas disponíveis desta peça
+      const cap = chosen.captures[Math.floor(Math.random()*chosen.captures.length)];
+      doCapture(chosen.from, [cap[0],cap[1]], [cap[2],cap[3]]);
+    } else {
+      // movimentos simples
+      const simples = all.filter(e => e.moves && e.moves.length);
+      const pick = simples[Math.floor(Math.random()*simples.length)];
+      const mv = pick.moves[Math.floor(Math.random()*pick.moves.length)];
+      movePiece(pick.from, mv);
     }
+  }
 
-    function getPawnMoves(fromId, piece, forAttacksOnly = false) {
-        const moves = [];
-        const { row, col } = getCoordinates(fromId);
-        const color = piece.startsWith('W') ? 'white' : 'black';
-        const dir = color === 'white' ? 1 : -1;
+  aiToggle.addEventListener('click', () => {
+    aiEnabled = !aiEnabled;
+    aiToggle.textContent = `IA: ${aiEnabled ? 'ON' : 'OFF'} (pretas)`;
+    if(aiEnabled && turn==='b') setTimeout(()=> runAI(), 300);
+  });
 
-        // Movimento para a frente
-        if (!forAttacksOnly) {
-            const oneStepId = getIdFromCoordinates(row + dir, col);
-            if (oneStepId && !boardState[oneStepId]) {
-                moves.push(oneStepId);
-                // Primeiro movimento duplo
-                const startRow = color === 'white' ? 2 : 7;
-                if (row === startRow) {
-                    const twoStepsId = getIdFromCoordinates(row + 2 * dir, col);
-                    if (twoStepsId && !boardState[twoStepsId]) {
-                        moves.push(twoStepsId);
-                    }
-                }
-            }
-        }
+  restartBtn.addEventListener('click', resetBoard);
 
-        // Capturas
-        [col - 1, col + 1].forEach(c => {
-            const captureId = getIdFromCoordinates(row + dir, c);
-            if (captureId) {
-                // Captura normal
-                const targetPiece = boardState[captureId];
-                if (targetPiece && !targetPiece.startsWith(piece[0])) {
-                    moves.push(captureId);
-                }
-                // Captura En Passant
-                if (captureId === enPassantTarget) {
-                    moves.push(captureId);
-                }
-            }
-        });
+  // start
+  resetBoard();
 
-        return moves;
-    }
-    
-    function getLinearMoves(fromId, directions) {
-        const moves = [];
-        const { row, col } = getCoordinates(fromId);
-        const piece = boardState[fromId];
+  // expose for debug
+  window._damas = { board, pieceMoves, allMovesFor, resetBoard };
 
-        directions.forEach(([dRow, dCol]) => {
-            for (let i = 1; i <= 8; i++) {
-                const nextId = getIdFromCoordinates(row + i * dRow, col + i * dCol);
-                if (!nextId) break;
-                const targetPiece = boardState[nextId];
-                if (targetPiece) {
-                    if (!targetPiece.startsWith(piece[0])) moves.push(nextId);
-                    break;
-                }
-                moves.push(nextId);
-            }
-        });
-        return moves;
-    }
-
-    function getKnightMoves(fromId) {
-        const moves = [];
-        const { row, col } = getCoordinates(fromId);
-        const piece = boardState[fromId];
-        const knightOffsets = [[2, 1], [2, -1], [-2, 1], [-2, -1], [1, 2], [1, -2], [-1, 2], [-1, -2]];
-
-        knightOffsets.forEach(([dRow, dCol]) => {
-            const nextId = getIdFromCoordinates(row + dRow, col + dCol);
-            if (nextId) {
-                const targetPiece = boardState[nextId];
-                if (!targetPiece || !targetPiece.startsWith(piece[0])) {
-                    moves.push(nextId);
-                }
-            }
-        });
-        return moves;
-    }
-    
-    function getKingMoves(fromId) {
-        const moves = [];
-        const { row, col } = getCoordinates(fromId);
-        const piece = boardState[fromId];
-        const color = piece.startsWith('W') ? 'white' : 'black';
-        const c = piece.startsWith('W') ? 'w' : 'b';
-
-        // Movimentos normais
-        for (let dRow = -1; dRow <= 1; dRow++) {
-            for (let dCol = -1; dCol <= 1; dCol++) {
-                if (dRow === 0 && dCol === 0) continue;
-                const nextId = getIdFromCoordinates(row + dRow, col + dCol);
-                if (nextId) {
-                    const targetPiece = boardState[nextId];
-                    if (!targetPiece || !targetPiece.startsWith(piece[0])) {
-                        moves.push(nextId);
-                    }
-                }
-            }
-        }
-        
-        // Roque (Castling)
-        if (!isKingInCheck(color, boardState)) {
-            // Lado do rei (Kingside)
-            if (castlingRights[c].k && !boardState[getIdFromCoordinates(row, col + 1)] && !boardState[getIdFromCoordinates(row, col + 2)]) {
-                if (!isSquareAttacked(getIdFromCoordinates(row, col + 1), color) && !isSquareAttacked(getIdFromCoordinates(row, col + 2), color)) {
-                    moves.push(getIdFromCoordinates(row, col + 2));
-                }
-            }
-            // Lado da rainha (Queenside)
-            if (castlingRights[c].q && !boardState[getIdFromCoordinates(row, col - 1)] && !boardState[getIdFromCoordinates(row, col - 2)] && !boardState[getIdFromCoordinates(row, col - 3)]) {
-                if (!isSquareAttacked(getIdFromCoordinates(row, col - 1), color) && !isSquareAttacked(getIdFromCoordinates(row, col - 2), color)) {
-                    moves.push(getIdFromCoordinates(row, col - 2));
-                }
-            }
-        }
-        return moves;
-    }
-
-    function isSquareAttacked(squareId, attackedColor) {
-        const opponentColor = attackedColor === 'white' ? 'black' : 'white';
-        for (const id in boardState) {
-            const piece = boardState[id];
-            if (piece && (piece.startsWith('W') ? 'white' : 'black') === opponentColor) {
-                const attackMoves = getPseudoLegalMoves(id, piece, true);
-                if (attackMoves.includes(squareId)) return true;
-            }
-        }
-        return false;
-    }
-
-    // ===============================================
-    // PROMOÇÃO DE PEÃO
-    // ===============================================
-
-    function showPromotionDialog(pawnId) {
-        const promotionDialog = document.createElement('div');
-        promotionDialog.id = 'promotion-dialog';
-        const colorPrefix = turn === 'white' ? 'W' : 'B';
-        const pieces = ['queen', 'rook', 'bishop', 'knight'];
-        
-        promotionDialog.innerHTML = '<h3>Promover Peão para:</h3>';
-        pieces.forEach(p => {
-            const btn = document.createElement('button');
-            btn.className = `box ${colorPrefix}${p}`;
-            btn.dataset.piece = `${colorPrefix}${p}`;
-            btn.addEventListener('click', () => handlePromotionChoice(pawnId, btn.dataset.piece));
-            promotionDialog.appendChild(btn);
-        });
-        
-        gameArea.appendChild(promotionDialog);
-    }
-    
-    function handlePromotionChoice(pawnId, chosenPiece) {
-        boardState[pawnId] = chosenPiece;
-        document.getElementById('promotion-dialog')?.remove();
-        updateBoardUI();
-        changeTurn();
-    }
-    
-    // ===============================================
-    // FUNÇÕES AUXILIARES E DE UI
-    // ===============================================
-    
-    function getCoordinates(id) {
-        return { row: parseInt(id[1]), col: parseInt(id[3]) };
-    }
-
-    function getIdFromCoordinates(row, col) {
-        if (row < 1 || row > 8 || col < 1 || col > 8) return null;
-        return `b${row}0${col}`;
-    }
-
-    function updateBoardUI() {
-        boxes.forEach(box => {
-            const piece = boardState[box.id];
-            box.className = 'box' + (piece ? ` ${piece}` : '');
-        });
-    }
-
-    function removeHighlightsAndSelection() {
-        boxes.forEach(box => {
-            box.classList.remove('highlight', 'selected');
-        });
-        selectedBox = null;
-    }
-
-    function updateTurnIndicator() {
-        const turnName = turn === 'white' ? 'Branco' : 'Preto';
-        tog.textContent = `Turno: ${turnName}`;
-        if (isKingInCheck(turn, boardState)) {
-            tog.textContent += ' (Xeque!)';
-        }
-    }
-    
-    function showAlert(message) {
-        const alertBox = document.createElement('div');
-        alertBox.id = 'game-over-alert';
-        alertBox.innerHTML = `<h2>Fim de Jogo</h2><p>${message}</p>`;
-        gameArea.appendChild(alertBox);
-    }
-    
-    // ===============================================
-    // HISTÓRICO E DESFAZER JOGADA
-    // ===============================================
-
-    function saveHistory() {
-        history.push({
-            board: JSON.parse(JSON.stringify(boardState)),
-            turn: turn,
-            castling: JSON.parse(JSON.stringify(castlingRights)),
-            enPassant: enPassantTarget,
-            gameOver: isGameOver,
-        });
-    }
-
-    function undoMove() {
-        if (history.length <= 1) return;
-        
-        // Remove o estado atual e o anterior
-        history.pop();
-        const prevState = history[history.length - 1];
-        
-        boardState = prevState.board;
-        turn = prevState.turn;
-        castlingRights = prevState.castling;
-        enPassantTarget = prevState.enPassant;
-        isGameOver = prevState.gameOver;
-        
-        removeHighlightsAndSelection();
-        updateBoardUI();
-        updateTurnIndicator();
-        document.getElementById('game-over-alert')?.remove();
-        document.getElementById('promotion-dialog')?.remove();
-    }
-    
-    initializeGame();
-});
+})();
