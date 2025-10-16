@@ -1,485 +1,311 @@
 var square_class = document.getElementsByClassName("square");
-var white_checker_class = document.getElementsByClassName("white_checker");
-var black_checker_class = document.getElementsByClassName("black_checker");
+var white_checker_class;
+var black_checker_class;
 var table = document.getElementById("table");
 var score = document.getElementById("score");
-var black_background = document.getElementById("black_background");
 var moveSound = document.getElementById("moveSound");
 var winSound = document.getElementById("winSound");
 
-// --- VARIÁVEIS DE DIMENSÃO AJUSTADAS PARA O NOVO CSS (60px/40px) ---
-var moveLength = 60; // Tamanho da célula para Desktop (ajustado de 80)
-var moveDeviation = 5; // Ajustado: (60px - 50px peça)/2 = 5px (para centralizar a peça)
-var Dimension = 1;
+var moveLength = 60;
+var moveDeviation = 5;
 
-var selectedPiece,selectedPieceindex;
-var upRight,upLeft,downLeft,downRight;
-var contor = 0 , gameOver = 0;
-var bigScreen = 1;
+var selectedPiece, selectedPieceindex;
+var upRight, upLeft, downLeft, downRight;
+var gameOver = 0;
 
 var block = [];
 var w_checker = [];
 var b_checker = [];
 var the_checker;
-var oneMove;
-var anotherMove;
 var mustAttack = false;
-var multiplier = 1
 
-var tableLimit,reverse_tableLimit ,  moveUpLeft,moveUpRight, moveDownLeft,moveDownRight , tableLimitLeft, tableLimitRight;
+var whoseTurn = "white"; 
 
-getDimension();
-initializeTable();
-drawCheckers();
+function getDimension() {
+    var windowWidth = window.innerWidth || document.documentElement.clientWidth || document.body.clientWidth;
+    if (windowWidth <= 768) {
+        moveLength = 40; 
+        moveDeviation = 2; 
+    } else {
+        moveLength = 60;
+        moveDeviation = 5;
+    }
+}
 
-// --- FUNÇÃO getDimension AJUSTADA PARA O NOVO BREAKPOINT CSS (768px) ---
-function getDimension (){
-	contor ++;
-    var windowHeight = window.innerHeight
-	|| document.documentElement.clientHeight
-	|| document.body.clientHeight;
-    var windowWidth =  window.innerWidth
-	|| document.documentElement.clientWidth
-	|| document.body.clientWidth;
+function drawCheckers() {
+    let whiteIndex = 1;
+    let blackIndex = 1;
+    for (let i = 1; i <= 8; i++) {
+        for (let j = 1; j <= 8; j++) {
+            if (block[i][j].color == "black") {
+                if (i <= 3) {
+                    table.innerHTML += `<div class='checker black_checker' id='b_checker_${blackIndex}'></div>`;
+                    block[i][j].occupier = "black";
+                    b_checker[blackIndex] = new Checker(document.getElementById(`b_checker_${blackIndex}`), blackIndex, "black", block[i][j].top, block[i][j].left);
+                    blackIndex++;
+                } else if (i >= 6) {
+                    table.innerHTML += `<div class='checker white_checker' id='w_checker_${whiteIndex}'></div>`;
+                    block[i][j].occupier = "white";
+                    w_checker[whiteIndex] = new Checker(document.getElementById(`w_checker_${whiteIndex}`), whiteIndex, "white", block[i][j].top, block[i][j].left);
+                    whiteIndex++;
+                }
+            }
+        }
+    }
 
-    // Novo Breakpoint de responsividade (de 640 para 768px, conforme o site-geral.css)
-	if(windowWidth > 768){ 
-		moveLength = 60;
-		moveDeviation = 5;
-		bigScreen = 1;
-	} else {
-		moveLength = 40; // Tamanho da célula para Mobile
-		moveDeviation = 2; // (40px - 36px peça)/2 = 2px
-		bigScreen = 0;
+    white_checker_class = document.getElementsByClassName("white_checker");
+    black_checker_class = document.getElementsByClassName("black_checker");
+
+    for (let i = 0; i < white_checker_class.length; i++) {
+        white_checker_class[i].setAttribute("onClick", "selectPiece(this)");
+    }
+    for (let i = 0; i < black_checker_class.length; i++) {
+        black_checker_class[i].setAttribute("onClick", "selectPiece(this)");
+    }
+    the_checker = w_checker;
+}
+
+function initializeTable() {
+    for (let i = 1; i <= 8; i++) {
+        block[i] = [];
+        for (let j = 1; j <= 8; j++) {
+            var top = (i - 1) * moveLength;
+            var left = (j - 1) * moveLength;
+            var squareElement = document.getElementById("sq" + i + j);
+            var color = (i % 2 !== j % 2) ? "black" : "white";
+            block[i][j] = new Block(squareElement, color, i, j, left, top);
+        }
+    }
+}
+
+function Block(element, color, row, col, left, top) {
+    this.element = element;
+    this.color = color;
+    this.row = row;
+    this.col = col;
+    this.left = left;
+    this.top = top;
+    this.occupier = null;
+    if (this.color === 'black') {
+        this.element.setAttribute("onClick", "movePiece(this)");
+    }
+}
+
+function Checker(element, id, color, top, left) {
+    this.element = element;
+    this.id = id;
+    this.color = color;
+    this.king = false;
+    this.alive = true;
+    this.top = top;
+    this.left = left;
+    this.element.style.top = top + moveDeviation + "px";
+    this.element.style.left = left + moveDeviation + "px";
+}
+
+function getCheckerByElement(element) {
+    const isWhite = element.classList.contains('white_checker');
+    const checkers = isWhite ? w_checker : b_checker;
+    for (let i = 1; i < checkers.length; i++) {
+        if (checkers[i] && checkers[i].element === element) {
+            return checkers[i];
+        }
+    }
+    return null;
+}
+
+function selectPiece(pieceElement) {
+    if (gameOver) return;
+    
+    selectedPiece = getCheckerByElement(pieceElement);
+    if (!selectedPiece || selectedPiece.color !== whoseTurn) return;
+
+    playSound(moveSound);
+    erase_roads();
+
+    let potentialMoves = getAvailableMoves(selectedPiece);
+    mustAttack = potentialMoves.some(move => move.isAttack);
+
+    if (mustAttack) {
+        potentialMoves = potentialMoves.filter(move => move.isAttack);
+    }
+    
+    potentialMoves.forEach(move => {
+        move.square.element.style.backgroundColor = "lightgreen";
+        if (move.isAttack) {
+            move.jumpedSquare.element.style.boxShadow = "0 0 15px orange";
+        }
+    });
+}
+
+function getAvailableMoves(piece) {
+    const moves = [];
+    const directions = [];
+    
+    if (piece.color === 'white' || piece.king) {
+        directions.push({ y: -1, x: -1 }, { y: -1, x: 1 }); // Up-left, Up-right
+    }
+    if (piece.color === 'black' || piece.king) {
+        directions.push({ y: 1, x: -1 }, { y: 1, x: 1 }); // Down-left, Down-right
+    }
+
+    for (const dir of directions) {
+        const oneStep = getSquare(piece.top + dir.y * moveLength, piece.left + dir.x * moveLength);
+        if (oneStep && !oneStep.occupier) {
+            moves.push({ square: oneStep, isAttack: false });
+        } else if (oneStep && oneStep.occupier && oneStep.occupier !== piece.color) {
+            const twoSteps = getSquare(piece.top + 2 * dir.y * moveLength, piece.left + 2 * dir.x * moveLength);
+            if (twoSteps && !twoSteps.occupier) {
+                moves.push({ square: twoSteps, isAttack: true, jumpedSquare: oneStep });
+            }
+        }
+    }
+    return moves;
+}
+
+function movePiece(squareElement) {
+    if (squareElement.style.backgroundColor !== "lightgreen" || !selectedPiece) return;
+    
+    const fromSquare = getSquare(selectedPiece.top, selectedPiece.left);
+    const toSquare = getSquareByElement(squareElement);
+    
+    const moveDistance = Math.abs(toSquare.row - fromSquare.row);
+    let wasAttack = false;
+
+    if (moveDistance === 2) {
+        const jumpedX = selectedPiece.left + (toSquare.left - selectedPiece.left) / 2;
+        const jumpedY = selectedPiece.top + (toSquare.top - selectedPiece.top) / 2;
+        const jumpedSquare = getSquare(jumpedY, jumpedX);
+        const jumpedPieceColor = jumpedSquare.occupier;
+        const jumpedCheckers = jumpedPieceColor === 'white' ? w_checker : b_checker;
+        
+        for (let i = 1; i < jumpedCheckers.length; i++) {
+            if (jumpedCheckers[i] && jumpedCheckers[i].top === jumpedY && jumpedCheckers[i].left === jumpedX) {
+                jumpedCheckers[i].element.remove();
+                jumpedCheckers[i].alive = false;
+                break;
+            }
+        }
+        jumpedSquare.occupier = null;
+        wasAttack = true;
+    }
+
+    playSound(moveSound);
+    
+    fromSquare.occupier = null;
+    toSquare.occupier = selectedPiece.color;
+    selectedPiece.top = toSquare.top;
+    selectedPiece.left = toSquare.left;
+    selectedPiece.element.style.top = toSquare.top + moveDeviation + "px";
+    selectedPiece.element.style.left = toSquare.left + moveDeviation + "px";
+
+    // Kinging
+    if ((selectedPiece.color === "white" && toSquare.row === 1) || (selectedPiece.color === "black" && toSquare.row === 8)) {
+        if (!selectedPiece.king) {
+            selectedPiece.king = true;
+            selectedPiece.element.style.border = "4px solid gold";
+        }
+    }
+    
+    erase_roads();
+
+    let canAttackAgain = wasAttack && getAvailableMoves(selectedPiece).some(move => move.isAttack);
+
+    if (!canAttackAgain) {
+        changeTurns();
+    } else {
+        // Force another attack
+        selectPiece(selectedPiece.element);
+    }
+    
+    checkGameEnd();
+}
+
+function changeTurns() {
+    whoseTurn = (whoseTurn === "white") ? "black" : "white";
+    the_checker = (whoseTurn === "white") ? w_checker : b_checker;
+}
+
+function checkGameEnd() {
+    let whitePieces = w_checker.filter(p => p && p.alive).length;
+    let blackPieces = b_checker.filter(p => p && p.alive).length;
+
+    if (whitePieces === 0) {
+        declareWinner("Preto");
+    } else if (blackPieces === 0) {
+        declareWinner("Branco");
+    } else {
+        // Check for no available moves
+        const currentPlayerCheckers = whoseTurn === 'white' ? w_checker : b_checker;
+        let hasMoves = false;
+        for(let i = 1; i < currentPlayerCheckers.length; i++) {
+            if(currentPlayerCheckers[i] && currentPlayerCheckers[i].alive) {
+                if(getAvailableMoves(currentPlayerCheckers[i]).length > 0) {
+                    hasMoves = true;
+                    break;
+                }
+            }
+        }
+        if(!hasMoves) {
+            declareWinner(whoseTurn === 'white' ? 'Preto' : 'Branco');
+        }
     }
 }
 
 
-function drawCheckers(){
-	var i,j;
-	for(i=1; i<=3; i++)
-		for(j=1; j<=8; j++)
-			if(block[i][j].color == "black"){
-				table.innerHTML += "<div class='checker black_checker' id='bc"+(8*(i-1)+j)+"' style='top:"+block[i][j].top+";left:"+block[i][j].left+";'> </div>";
-				block[i][j].occupier = "black";
-			}
-	for(i=6; i<=8; i++)
-		for(j=1; j<=8; j++)
-			if(block[i][j].color == "black"){
-				table.innerHTML += "<div class='checker white_checker' id='wc"+(8*(i-6)+j)+"' style='top:"+block[i][j].top+";left:"+block[i][j].left+";'> </div>";
-				block[i][j].occupier = "white";
-			}
-
-	white_checker_class = document.getElementsByClassName("white_checker");
-	black_checker_class = document.getElementsByClassName("black_checker");
-	
-	for(i=0; i<white_checker_class.length; i++){
-		white_checker_class[i].setAttribute("onClick","selectPiece(this,"+i+")");
-		w_checker[i+1] = new Checker(white_checker_class[i],i+1,"white",parseInt(white_checker_class[i].style.top),parseInt(white_checker_class[i].style.left));
-	}
-	for(i=0; i<black_checker_class.length; i++){
-		black_checker_class[i].setAttribute("onClick","selectPiece(this,"+i+")");
-		b_checker[i+1] = new Checker(black_checker_class[i],i+1,"black",parseInt(black_checker_class[i].style.top),parseInt(black_checker_class[i].style.left));
-	}
-	the_checker = b_checker;
+function getSquare(top, left) {
+    if (top < 0 || left < 0 || top > moveLength * 7 || left > moveLength * 7) return false;
+    let row = top / moveLength + 1;
+    let col = left / moveLength + 1;
+    return block[row][col];
 }
 
-function initializeTable(){
-	var i,j,k=0;
-	for(i=1; i<=8; i++){
-		block[i] = [];
-		for(j=1; j<=8; j++){
-			k++;
-			var top = (i-1)*moveLength;
-			var left = (j-1)*moveLength;
-			if(i%2 == j%2){
-				block[i][j] = new Block(document.getElementById("sq"+i+j),"white",i,j,left,top);
-			}else{
-				block[i][j] = new Block(document.getElementById("sq"+i+j),"black",i,j,left,top);
-			}
-		}
-	}
-}
-
-function Block(element, color, row, col, left, top){
-	this.element = element;
-	this.color = color;
-	this.row = row;
-	this.col = col;
-	this.left = left;
-	this.top = top;
-	this.occupier = null;
-	this.element.setAttribute("onClick","movePiece(this)");
-}
-
-function Checker(element, id, color, top, left){
-	this.element = element;
-	this.id = id;
-	this.color = color;
-	this.top = top;
-	this.left = left;
-	this.king = false;
-	this.alive = true;
-	this.element.style.top = top +"px";
-	this.element.style.left = left +"px";
-}
-
-function selectPiece(piece, index){
-
-	if(the_checker[1].color != piece.color)
-		return;
-
-	playSound(moveSound);
-	erase_roads(0);
-
-	if(piece.id[0] == 'w'){
-		selectedPiece = w_checker[index+1];
-		selectedPieceindex = index+1;
-		
-	}else{
-		selectedPiece = b_checker[index+1];
-		selectedPieceindex = index+1;
-	}
-	
-	upRight = getSquare(selectedPiece.top - moveLength, selectedPiece.left + moveLength);
-	upLeft = getSquare(selectedPiece.top - moveLength, selectedPiece.left - moveLength);
-	downRight = getSquare(selectedPiece.top + moveLength, selectedPiece.left + moveLength);
-	downLeft = getSquare(selectedPiece.top + moveLength, selectedPiece.left - moveLength);
-	
-	tableLimit = 5*moveLength;
-	reverse_tableLimit = 3*moveLength;
-	moveUpLeft = getSquare(selectedPiece.top - 2*moveLength, selectedPiece.left - 2*moveLength);
-	moveUpRight = getSquare(selectedPiece.top - 2*moveLength, selectedPiece.left + 2*moveLength);
-	moveDownLeft = getSquare(selectedPiece.top + 2*moveLength, selectedPiece.left - 2*moveLength);
-	moveDownRight = getSquare(selectedPiece.top + 2*moveLength, selectedPiece.left + 2*moveLength);
-	tableLimitLeft = 1*moveLength;
-	tableLimitRight = 6*moveLength;
-
-	//attack
-	if(selectedPiece.color == "white" || selectedPiece.king){
-		if(upRight && upRight.occupier == "black" && selectedPiece.top > moveLength && selectedPiece.left < tableLimitRight && getSquare(selectedPiece.top - 2*moveLength, selectedPiece.left + 2*moveLength) && !getSquare(selectedPiece.top - 2*moveLength, selectedPiece.left + 2*moveLength).occupier){
-			getSquare(selectedPiece.top - 2*moveLength, selectedPiece.left + 2*moveLength).element.style.backgroundColor = "lightgreen";
-			mustAttack = true;
-			upRight.element.style.boxShadow = "0 0 15px orange";
-		}
-		if(upLeft && upLeft.occupier == "black" && selectedPiece.top > moveLength && selectedPiece.left > tableLimitLeft && getSquare(selectedPiece.top - 2*moveLength, selectedPiece.left - 2*moveLength) && !getSquare(selectedPiece.top - 2*moveLength, selectedPiece.left - 2*moveLength).occupier){
-			getSquare(selectedPiece.top - 2*moveLength, selectedPiece.left - 2*moveLength).element.style.backgroundColor = "lightgreen";
-			mustAttack = true;
-			upLeft.element.style.boxShadow = "0 0 15px orange";
-		}
-	}
-	if(selectedPiece.color == "black" || selectedPiece.king){
-		if(downRight && downRight.occupier == "white" && selectedPiece.top < tableLimit && selectedPiece.left < tableLimitRight && getSquare(selectedPiece.top + 2*moveLength, selectedPiece.left + 2*moveLength) && !getSquare(selectedPiece.top + 2*moveLength, selectedPiece.left + 2*moveLength).occupier){
-			getSquare(selectedPiece.top + 2*moveLength, selectedPiece.left + 2*moveLength).element.style.backgroundColor = "lightgreen";
-			mustAttack = true;
-			downRight.element.style.boxShadow = "0 0 15px orange";
-		}
-		if(downLeft && downLeft.occupier == "white" && selectedPiece.top < tableLimit && selectedPiece.left > tableLimitLeft && getSquare(selectedPiece.top + 2*moveLength, selectedPiece.left - 2*moveLength) && !getSquare(selectedPiece.top + 2*moveLength, selectedPiece.left - 2*moveLength).occupier){
-			getSquare(selectedPiece.top + 2*moveLength, selectedPiece.left - 2*moveLength).element.style.backgroundColor = "lightgreen";
-			mustAttack = true;
-			downLeft.element.style.boxShadow = "0 0 15px orange";
-		}
-	}
-	
-	//move
-	if(!mustAttack){
-		if(selectedPiece.color == "white" || selectedPiece.king){
-			if(upRight && !upRight.occupier && selectedPiece.top > 0 && selectedPiece.left < 7*moveLength){
-				upRight.element.style.backgroundColor = "lightgreen";
-			}
-			if(upLeft && !upLeft.occupier && selectedPiece.top > 0 && selectedPiece.left > 0){
-				upLeft.element.style.backgroundColor = "lightgreen";
-			}
-		}
-		if(selectedPiece.color == "black" || selectedPiece.king){
-			if(downRight && !downRight.occupier && selectedPiece.top < 7*moveLength && selectedPiece.left < 7*moveLength){
-				downRight.element.style.backgroundColor = "lightgreen";
-			}
-			if(downLeft && !downLeft.occupier && selectedPiece.top < 7*moveLength && selectedPiece.left > 0){
-				downLeft.element.style.backgroundColor = "lightgreen";
-			}
-		}
-	}
-	
-	if(mustAttack)
-		if(!checkIfMustAttack())
-			mustAttack = false;
-	
-}
-
-function movePiece(square){
-	if(square.style.backgroundColor != "lightgreen")
-		return;
-	
-	playSound(moveSound);
-	selectedPiece.element.style.top = square.top + moveDeviation + "px";
-	selectedPiece.element.style.left = square.left + moveDeviation + "px";
-	
-	getSquare(selectedPiece.top,selectedPiece.left).occupier = null;
-	selectedPiece.top = square.top;
-	selectedPiece.left = square.left;
-	square.occupier = selectedPiece.color;
-	
-	erase_roads(0);
-	
-	//attack
-	var i;
-	for(i=1; i<=2; i++){
-		if(i==1){
-			oneMove = Math.abs(selectedPiece.top - moveUpRight.top) + Math.abs(selectedPiece.left - moveUpRight.left) == 4*moveLength;
-			anotherMove = Math.abs(square.top - moveUpRight.top) + Math.abs(square.left - moveUpRight.left) == 2*moveLength;
-		}else{
-			oneMove = Math.abs(selectedPiece.top - moveUpLeft.top) + Math.abs(selectedPiece.left - moveUpLeft.left) == 4*moveLength;
-			anotherMove = Math.abs(square.top - moveUpLeft.top) + Math.abs(square.left - moveUpLeft.left) == 2*moveLength;
-		}
-		if(selectedPiece.color == "white" && oneMove && anotherMove){
-			if(getSquare(selectedPiece.top + moveLength, selectedPiece.left - moveLength) && getSquare(selectedPiece.top + moveLength, selectedPiece.left - moveLength).occupier == "black"){
-				getSquare(selectedPiece.top + moveLength, selectedPiece.left - moveLength).occupier = null;
-				removeChecker(b_checker, getSquare(selectedPiece.top + moveLength, selectedPiece.left - moveLength).element.id);
-				
-			}else if(getSquare(selectedPiece.top + moveLength, selectedPiece.left + moveLength) && getSquare(selectedPiece.top + moveLength, selectedPiece.left + moveLength).occupier == "black"){
-				getSquare(selectedPiece.top + moveLength, selectedPiece.left + moveLength).occupier = null;
-				removeChecker(b_checker, getSquare(selectedPiece.top + moveLength, selectedPiece.left + moveLength).element.id);
-			}
-			
-		}
-
-		if(i==1){
-			oneMove = Math.abs(selectedPiece.top - moveDownRight.top) + Math.abs(selectedPiece.left - moveDownRight.left) == 4*moveLength;
-			anotherMove = Math.abs(square.top - moveDownRight.top) + Math.abs(square.left - moveDownRight.left) == 2*moveLength;
-		}else{
-			oneMove = Math.abs(selectedPiece.top - moveDownLeft.top) + Math.abs(selectedPiece.left - moveDownLeft.left) == 4*moveLength;
-			anotherMove = Math.abs(square.top - moveDownLeft.top) + Math.abs(square.left - moveDownLeft.left) == 2*moveLength;
-		}
-		if(selectedPiece.color == "black" && oneMove && anotherMove){
-			if(getSquare(selectedPiece.top - moveLength, selectedPiece.left - moveLength) && getSquare(selectedPiece.top - moveLength, selectedPiece.left - moveLength).occupier == "white"){
-				getSquare(selectedPiece.top - moveLength, selectedPiece.left - moveLength).occupier = null;
-				removeChecker(w_checker, getSquare(selectedPiece.top - moveLength, selectedPiece.left - moveLength).element.id);
-			}else if(getSquare(selectedPiece.top - moveLength, selectedPiece.left + moveLength) && getSquare(selectedPiece.top - moveLength, selectedPiece.left + moveLength).occupier == "white"){
-				getSquare(selectedPiece.top - moveLength, selectedPiece.left + moveLength).occupier = null;
-				removeChecker(w_checker, getSquare(selectedPiece.top - moveLength, selectedPiece.left + moveLength).element.id);
-			}
-		}
-	}
-	//king
-	if(selectedPiece.color == "white" && selectedPiece.top == 0){
-		selectedPiece.element.style.border = "4px solid gold";
-		selectedPiece.king = true;
-	}
-	if(selectedPiece.color == "black" && selectedPiece.top == 7*moveLength){
-		selectedPiece.element.style.border = "4px solid gold";
-		selectedPiece.king = true;
-	}
-
-	if(!checkIfLost()){
-		if(mustAttack){
-			if(checkIfMustAttack()){
-				selectPiece(selectedPiece.element, selectedPieceindex-1);
-				mustAttack = false;
-				return;
-			}
-		}
-		changeTurns(selectedPiece);
-		if(checkForMoves())
-			declareWinner();
-	}else{
-		declareWinner();
-	}
-	mustAttack = false;
-}
-
-function getSquare(top, left){
-	var i,j;
-	for(i=1; i<=8; i++)
-		for(j=1; j<=8; j++)
-			if(block[i][j].top == top && block[i][j].left == left)
-				return block[i][j];
-	return false;
-}
-
-function removeChecker(arr, id){
-	var i;
-	for(i=1; i<arr.length; i++){
-		if(arr[i].element.id == id){
-			arr[i].element.remove();
-			arr[i].alive = false;
-			return;
-		}
-	}
-}
-
-function erase_roads(multiplier){
-	var i,j;
-	for(i=1; i<=8; i++)
-		for(j=1; j<=8; j++){
-			if(i%2 != j%2){
-				block[i][j].element.style.backgroundColor = "black";
-				block[i][j].element.style.boxShadow = "";
-			}
-			else{
-				block[i][j].element.style.backgroundColor = "white";
-				block[i][j].element.style.boxShadow = "";
-			}
-		}
-
-	if(multiplier){
-		for(i=0; i<white_checker_class.length; i++){
-			if(w_checker[i+1].alive)
-				w_checker[i+1].element.style.boxShadow = "0 0 15px orange";
-		}
-		for(i=0; i<black_checker_class.length; i++){
-			if(b_checker[i+1].alive)
-				b_checker[i+1].element.style.boxShadow = "0 0 15px orange";
-		}
-	}
-}
-
-function checkIfMustAttack(){
-	
-	upRight = getSquare(selectedPiece.top - moveLength, selectedPiece.left + moveLength);
-	upLeft = getSquare(selectedPiece.top - moveLength, selectedPiece.left - moveLength);
-	downRight = getSquare(selectedPiece.top + moveLength, selectedPiece.left + moveLength);
-	downLeft = getSquare(selectedPiece.top + moveLength, selectedPiece.left - moveLength);
-
-	tableLimit = 5*moveLength;
-	reverse_tableLimit = 3*moveLength;
-	moveUpLeft = getSquare(selectedPiece.top - 2*moveLength, selectedPiece.left - 2*moveLength);
-	moveUpRight = getSquare(selectedPiece.top - 2*moveLength, selectedPiece.left + 2*moveLength);
-	moveDownLeft = getSquare(selectedPiece.top + 2*moveLength, selectedPiece.left - 2*moveLength);
-	moveDownRight = getSquare(selectedPiece.top + 2*moveLength, selectedPiece.left + 2*moveLength);
-	tableLimitLeft = 1*moveLength;
-	tableLimitRight = 6*moveLength;
-
-	if(selectedPiece.color == "white" || selectedPiece.king){
-		if(upRight && upRight.occupier == "black" && selectedPiece.top > moveLength && selectedPiece.left < tableLimitRight && moveUpRight && !moveUpRight.occupier)
-			return true;
-		if(upLeft && upLeft.occupier == "black" && selectedPiece.top > moveLength && selectedPiece.left > tableLimitLeft && moveUpLeft && !moveUpLeft.occupier)
-			return true;
-	}
-	if(selectedPiece.color == "black" || selectedPiece.king){
-		if(downRight && downRight.occupier == "white" && selectedPiece.top < tableLimit && selectedPiece.left < tableLimitRight && moveDownRight && !moveDownRight.occupier)
-			return true;
-		if(downLeft && downLeft.occupier == "white" && selectedPiece.top < tableLimit && selectedPiece.left > tableLimitLeft && moveDownLeft && !moveDownLeft.occupier)
-			return true;
-	}
-	return false;
-}
-
-function changeTurns(ckc){
-	if(ckc.color=="white")
-		the_checker = b_checker;
-	else
-		the_checker = w_checker;
-}
-
-function checkIfLost(){
-	var i;
-	for(i = 1 ; i <= 12; i++)
-		if(the_checker[i].alive)
-			return false;
-	return true;
-}
-
-function  checkForMoves(){
-	var i ;
-	for(i = 1 ; i <= 12; i++)
-		if(the_checker[i].alive && showMoves(the_checker[i].id)){
-			erase_roads(0);
-			return false;
-		}
-	return true;
-}
-
-function showMoves(id){
-	if(id[0] == 'w'){
-		var piece = w_checker[parseInt(id.slice(2))];
-	}else{
-		var piece = b_checker[parseInt(id.slice(2))];
-	}
-
-	selectedPiece = piece;
-
-	upRight = getSquare(selectedPiece.top - moveLength, selectedPiece.left + moveLength);
-	upLeft = getSquare(selectedPiece.top - moveLength, selectedPiece.left - moveLength);
-	downRight = getSquare(selectedPiece.top + moveLength, selectedPiece.left + moveLength);
-	downLeft = getSquare(selectedPiece.top + moveLength, selectedPiece.left - moveLength);
-
-	tableLimit = 5*moveLength;
-	reverse_tableLimit = 3*moveLength;
-	moveUpLeft = getSquare(selectedPiece.top - 2*moveLength, selectedPiece.left - 2*moveLength);
-	moveUpRight = getSquare(selectedPiece.top - 2*moveLength, selectedPiece.left + 2*moveLength);
-	moveDownLeft = getSquare(selectedPiece.top + 2*moveLength, selectedPiece.left - 2*moveLength);
-	moveDownRight = getSquare(selectedPiece.top + 2*moveLength, selectedPiece.left + 2*moveLength);
-	tableLimitLeft = 1*moveLength;
-	tableLimitRight = 6*moveLength;
-
-	//attack
-	if(selectedPiece.color == "white" || selectedPiece.king){
-		if(upRight && upRight.occupier == "black" && selectedPiece.top > moveLength && selectedPiece.left < tableLimitRight && moveUpRight && !moveUpRight.occupier){
-			selectedPiece = null;
-			return true;
-		}
-		if(upLeft && upLeft.occupier == "black" && selectedPiece.top > moveLength && selectedPiece.left > tableLimitLeft && moveUpLeft && !moveUpLeft.occupier){
-			selectedPiece = null;
-			return true;
-		}
-	}
-	if(selectedPiece.color == "black" || selectedPiece.king){
-		if(downRight && downRight.occupier == "white" && selectedPiece.top < tableLimit && selectedPiece.left < tableLimitRight && moveDownRight && !moveDownRight.occupier){
-			selectedPiece = null;
-			return true;
-		}
-		if(downLeft && downLeft.occupier == "white" && selectedPiece.top < tableLimit && selectedPiece.left > tableLimitLeft && moveDownLeft && !moveDownLeft.occupier){
-			selectedPiece = null;
-			return true;
-		}
-	}
-
-	//move
-	if(!mustAttack){
-		if(selectedPiece.color == "white" || selectedPiece.king){
-			if(upRight && !upRight.occupier && selectedPiece.top > 0 && selectedPiece.left < 7*moveLength){
-				selectedPiece = null;
-				return true;
-			}
-			if(upLeft && !upLeft.occupier && selectedPiece.top > 0 && selectedPiece.left > 0){
-				selectedPiece = null;
-				return true;
-			}
-		}
-		if(selectedPiece.color == "black" || selectedPiece.king){
-			if(downRight && !downRight.occupier && selectedPiece.top < 7*moveLength && selectedPiece.left < 7*moveLength){
-				selectedPiece = null;
-				return true;
-			}
-			if(downLeft && !downLeft.occupier && selectedPiece.top < 7*moveLength && selectedPiece.left > 0){
-				selectedPiece = null;
-				return true;
-			}
-		}
-	}
-	selectedPiece = null;
-	return false;
-}
-
-function declareWinner(){
-	playSound(winSound);
-	score.style.display = "block";
-
-	if(the_checker[1].color == "white")
-		score.innerHTML = "Preto Ganhou!";
-	else
-		score.innerHTML = "Branco Ganhou!";
-	gameOver = 1;
-
-	// Reinicia o jogo após 5 segundos
-	setTimeout(function() {
-        if (gameOver) {
-            window.location.reload();
+function getSquareByElement(element) {
+    for (let i = 1; i <= 8; i++) {
+        for (let j = 1; j <= 8; j++) {
+            if (block[i][j].element === element) {
+                return block[i][j];
+            }
         }
-    }, 5000);
+    }
+    return null;
 }
 
-function playSound(sound){
-	if(sound) sound.play();
+function erase_roads() {
+    for (let i = 1; i <= 8; i++) {
+        for (let j = 1; j <= 8; j++) {
+            if (block[i][j].color === 'black') {
+                block[i][j].element.style.backgroundColor = "#BA7A3A";
+                block[i][j].element.style.boxShadow = "";
+            }
+        }
+    }
+}
+
+function declareWinner(winner) {
+    if (gameOver) return;
+    gameOver = 1;
+    playSound(winSound);
+    score.style.display = "block";
+    score.innerHTML = `${winner} Ganhou!`;
+
+    setTimeout(() => window.location.reload(), 5000);
+}
+
+function playSound(sound) {
+    if (sound) {
+        sound.currentTime = 0;
+        sound.play();
+    }
+}
+
+// --- INITIALIZE GAME ---
+window.onload = () => {
+    getDimension();
+    initializeTable();
+    drawCheckers();
+};
+
+window.onresize = () => {
+    window.location.reload();
 }

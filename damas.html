@@ -8,7 +8,7 @@
 	<meta name="viewport" content="width=device-width, initial-scale=1.0">
 	<link rel="stylesheet" href="site-geral.css"> 
 </head>
-<body id="ht">
+<body>
     <header class="site-header">
         <img src="https://i.postimg.cc/Y0Mj2ZNP/Yellow-Blue-Retro-Dice-Game-Logo.png" class="logo" alt="Board N Play Logo" />
         <nav class="main-nav">
@@ -25,10 +25,6 @@
     <main class="main-content">
         <div class="game-area">
             <h1> Damas </h1>
-
-            <div class="checker white_checker" style="display:none"> </div>
-            <div class="checker black_checker" style="display:none"> </div>
-            <div class="square" style="display: none" id ="ht"> </div>
             
             <div id="table" class="checker-board">
                 <div class="square black_square" id="sq11"> </div><div class="square white_square" id="sq12"> </div><div class="square black_square" id="sq13"> </div><div class="square white_square" id="sq14"> </div><div class="square black_square" id="sq15"> </div><div class="square white_square" id="sq16"> </div><div class="square black_square" id="sq17"> </div><div class="square white_square" id="sq18"> </div><div class="clear_float"> </div>
@@ -41,15 +37,14 @@
                 <div class="square white_square" id="sq81"> </div><div class="square black_square" id="sq82"> </div><div class="square white_square" id="sq83"> </div><div class="square black_square" id="sq84"> </div><div class="square white_square" id="sq85"> </div><div class="square black_square" id="sq86"> </div><div class="square white_square" id="sq87"> </div><div class="square black_square" id="sq88"> </div><div class="clear_float"> </div>
             </div>
 
-            <div id="score" class="score"> </div>
-            <div id="black_background"> </div>
+            <div id="score"></div>
             
             <button onclick="window.location.reload()" id="resetBtn"> Reiniciar Jogo </button>
         </div>
     </main>
     
-    <audio id="moveSound" src="move.mp3" preload="auto"></audio>
-    <audio id="winSound" src="win.mp3" preload="auto"></audio>
+    <audio id="moveSound" src="https://cdn.freesound.org/previews/274/274175_5121236-lq.mp3" preload="auto"></audio>
+    <audio id="winSound" src="https://cdn.freesound.org/previews/656/656473_12470719-lq.mp3" preload="auto"></audio>
 
     <script src="damas.js"></script>
 </body>
