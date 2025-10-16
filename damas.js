@@ -1,5 +1,3 @@
-
-
 var square_class = document.getElementsByClassName("square");
 var white_checker_class = document.getElementsByClassName("white_checker");
 var black_checker_class = document.getElementsByClassName("black_checker");
@@ -8,15 +6,12 @@ var score = document.getElementById("score");
 var black_background = document.getElementById("black_background");
 var moveSound = document.getElementById("moveSound");
 var winSound = document.getElementById("winSound");
-var windowHeight = window.innerHeight
-|| document.documentElement.clientHeight
-|| document.body.clientHeight;  ;
-var windowWidth =  window.innerWidth
-|| document.documentElement.clientWidth
-|| document.body.clientWidth;
-var moveLength = 80 ;
-var moveDeviation = 10;
+
+// --- VARIÁVEIS DE DIMENSÃO AJUSTADAS PARA O NOVO CSS (60px/40px) ---
+var moveLength = 60; // Tamanho da célula para Desktop (ajustado de 80)
+var moveDeviation = 5; // Ajustado: (60px - 50px peça)/2 = 5px (para centralizar a peça)
 var Dimension = 1;
+
 var selectedPiece,selectedPieceindex;
 var upRight,upLeft,downLeft,downRight;
 var contor = 0 , gameOver = 0;
@@ -25,7 +20,7 @@ var bigScreen = 1;
 var block = [];
 var w_checker = [];
 var b_checker = [];
-var the_checker ;
+var the_checker;
 var oneMove;
 var anotherMove;
 var mustAttack = false;
@@ -33,407 +28,349 @@ var multiplier = 1
 
 var tableLimit,reverse_tableLimit ,  moveUpLeft,moveUpRight, moveDownLeft,moveDownRight , tableLimitLeft, tableLimitRight;
 
-	getDimension();
-	if(windowWidth > 640){
-		moveLength = 80;
-		moveDeviation = 10;
-	}
-	else{
-		moveLength = 50;
-		moveDeviation = 6;
-	}
+getDimension();
+initializeTable();
+drawCheckers();
+
+// --- FUNÇÃO getDimension AJUSTADA PARA O NOVO BREAKPOINT CSS (768px) ---
+function getDimension (){
+	contor ++;
+    var windowHeight = window.innerHeight
+	|| document.documentElement.clientHeight
+	|| document.body.clientHeight;
+    var windowWidth =  window.innerWidth
+	|| document.documentElement.clientWidth
+	|| document.body.clientWidth;
+
+    // Novo Breakpoint de responsividade (de 640 para 768px, conforme o site-geral.css)
+	if(windowWidth > 768){ 
+		moveLength = 60;
+		moveDeviation = 5;
+		bigScreen = 1;
+	} else {
+		moveLength = 40; // Tamanho da célula para Mobile
+		moveDeviation = 2; // (40px - 36px peça)/2 = 2px
+		bigScreen = 0;
+    }
+}
 
 
-var square_p = function(square,index){
-	this.id = square;
-	this.ocupied = false;
-	this.pieceId = undefined;
-	this.id.onclick = function() {
-		makeMove(index);
+function drawCheckers(){
+	var i,j;
+	for(i=1; i<=3; i++)
+		for(j=1; j<=8; j++)
+			if(block[i][j].color == "black"){
+				table.innerHTML += "<div class='checker black_checker' id='bc"+(8*(i-1)+j)+"' style='top:"+block[i][j].top+";left:"+block[i][j].left+";'> </div>";
+				block[i][j].occupier = "black";
+			}
+	for(i=6; i<=8; i++)
+		for(j=1; j<=8; j++)
+			if(block[i][j].color == "black"){
+				table.innerHTML += "<div class='checker white_checker' id='wc"+(8*(i-6)+j)+"' style='top:"+block[i][j].top+";left:"+block[i][j].left+";'> </div>";
+				block[i][j].occupier = "white";
+			}
+
+	white_checker_class = document.getElementsByClassName("white_checker");
+	black_checker_class = document.getElementsByClassName("black_checker");
+	
+	for(i=0; i<white_checker_class.length; i++){
+		white_checker_class[i].setAttribute("onClick","selectPiece(this,"+i+")");
+		w_checker[i+1] = new Checker(white_checker_class[i],i+1,"white",parseInt(white_checker_class[i].style.top),parseInt(white_checker_class[i].style.left));
+	}
+	for(i=0; i<black_checker_class.length; i++){
+		black_checker_class[i].setAttribute("onClick","selectPiece(this,"+i+")");
+		b_checker[i+1] = new Checker(black_checker_class[i],i+1,"black",parseInt(black_checker_class[i].style.top),parseInt(black_checker_class[i].style.left));
+	}
+	the_checker = b_checker;
+}
+
+function initializeTable(){
+	var i,j,k=0;
+	for(i=1; i<=8; i++){
+		block[i] = [];
+		for(j=1; j<=8; j++){
+			k++;
+			var top = (i-1)*moveLength;
+			var left = (j-1)*moveLength;
+			if(i%2 == j%2){
+				block[i][j] = new Block(document.getElementById("sq"+i+j),"white",i,j,left,top);
+			}else{
+				block[i][j] = new Block(document.getElementById("sq"+i+j),"black",i,j,left,top);
+			}
+		}
 	}
 }
 
-var checker = function(piece,color,square) {
-	this.id = piece;
+function Block(element, color, row, col, left, top){
+	this.element = element;
 	this.color = color;
+	this.row = row;
+	this.col = col;
+	this.left = left;
+	this.top = top;
+	this.occupier = null;
+	this.element.setAttribute("onClick","movePiece(this)");
+}
+
+function Checker(element, id, color, top, left){
+	this.element = element;
+	this.id = id;
+	this.color = color;
+	this.top = top;
+	this.left = left;
 	this.king = false;
-	this.ocupied_square = square;
 	this.alive = true;
-	this.attack = false;
-	if(square%8){
-		this.coordX= square%8;
-		this.coordY = Math.floor(square/8) + 1 ;
-	}
-	else{
-		this.coordX = 8;
-		this.coordY = square/8 ;
-	}
-	this.id.onclick = function  () {
-		showMoves(piece);	
-	}
+	this.element.style.top = top +"px";
+	this.element.style.left = left +"px";
 }
 
-checker.prototype.setCoord = function(X,Y){
-	var x = (this.coordX - 1  ) * moveLength + moveDeviation;
-	var y = (this.coordY - 1 ) * moveLength  + moveDeviation;
-	this.id.style.top = y + 'px';
-	this.id.style.left = x + 'px';
-}
+function selectPiece(piece, index){
 
-checker.prototype.changeCoord = function(X,Y){
-	this.coordY +=Y;
-	this.coordX += X;
-}
+	if(the_checker[1].color != piece.color)
+		return;
 
-checker.prototype.checkIfKing = function () {
-	if(this.coordY == 8 && !this.king &&this.color == "white"){
-		this.king = true;
-		this.id.style.border = "4px solid #FFFF00";
-	}
-	if(this.coordY == 1 && !this.king &&this.color == "black"){
-		this.king = true;
-		this.id.style.border = "4px solid #FFFF00";
-	}
-}
-
-
-for (var i = 1; i <=64; i++)
-	block[i] =new square_p(square_class[i],i);
-
-
-for (var i = 1; i <= 4; i++){
-	w_checker[i] = new checker(white_checker_class[i], "white", 2*i -1 );
-	w_checker[i].setCoord(0,0);
-	block[2*i - 1].ocupied = true;
-	block[2*i - 1].pieceId =w_checker[i];
-}
-
-for (var i = 5; i <= 8; i++){
-	w_checker[i] = new checker(white_checker_class[i], "white", 2*i );
-	w_checker[i].setCoord(0,0);
-	block[2*i].ocupied = true;
-	block[2*i].pieceId = w_checker[i];
-}
-
-for (var i = 9; i <= 12; i++){
-	w_checker[i] = new checker(white_checker_class[i], "white", 2*i - 1 );
-	w_checker[i].setCoord(0,0);
-	block[2*i - 1].ocupied = true;
-	block[2*i - 1].pieceId = w_checker[i];
-}
-
-for (var i = 1; i <= 4; i++){
-	b_checker[i] = new checker(black_checker_class[i], "black", 56 + 2*i  );
-	b_checker[i].setCoord(0,0);
-	block[56 +  2*i ].ocupied = true;
-	block[56+  2*i ].pieceId =b_checker[i];
-}
-
-for (var i = 5; i <= 8; i++){
-	b_checker[i] = new checker(black_checker_class[i], "black", 40 +  2*i - 1 );
-	b_checker[i].setCoord(0,0);
-	block[ 40 + 2*i - 1].ocupied = true;
-	block[ 40 + 2*i - 1].pieceId = b_checker[i];
-}
-
-for (var i = 9; i <= 12; i++){
-	b_checker[i] = new checker(black_checker_class[i], "black", 24 + 2*i  );
-	b_checker[i].setCoord(0,0);
-	block[24 + 2*i ].ocupied = true;
-	block[24 + 2*i ].pieceId = b_checker[i];
-}
-
-
-the_checker = w_checker;
-
-function showMoves (piece) {
-	
-	var match = false;
-	mustAttack = false;
-	if(selectedPiece){
-			erase_roads(selectedPiece);
-	}
-	selectedPiece = piece;
-	var i,j; 
-	for ( j = 1; j <= 12; j++){
-		if(the_checker[j].id == piece){
-			i = j;
-			selectedPieceindex = j;
-			match = true;
-		}
-	}
-
-	if(oneMove && !attackMoves(oneMove)){
-		changeTurns(oneMove);
-		oneMove = undefined;
-		return false;
-	}
-	if(oneMove && oneMove != the_checker[i] ){
-		return false;
-	}
-
-	if(!match) {
-	 return 0 ; 
-	}
-
-	if(the_checker[i].color =="white"){
-		tableLimit = 8;
-		tableLimitRight = 1;
-		tableLimitLeft = 8;
-		moveUpRight = 7;
-		moveUpLeft = 9;
-		moveDownRight = - 9;
-		moveDownLeft = -7;
-	}
-	else{
-		tableLimit = 1;
-		tableLimitRight = 8;
-		tableLimitLeft = 1;
-		moveUpRight = -7;
-		moveUpLeft = -9;
-		moveDownRight = 9;
-		moveDownLeft = 7;
-	}
- 	
-		attackMoves(the_checker[i]); 
-	
- 	if(!mustAttack){
- 	  downLeft = checkMove( the_checker[i] , tableLimit , tableLimitRight , moveUpRight , downLeft);
-		downRight = checkMove( the_checker[i] , tableLimit , tableLimitLeft , moveUpLeft , downRight);
-		if(the_checker[i].king){
-			upLeft = checkMove( the_checker[i] , reverse_tableLimit , tableLimitRight , moveDownRight , upLeft);
-			upRight = checkMove( the_checker[i], reverse_tableLimit , tableLimitLeft , moveDownLeft, upRight)
-		}
-	}
-	if(downLeft || downRight || upLeft || upRight){
-			return true;
-		}
-	return false;
-	
-}
-
-
-function erase_roads(piece){
-	if(downRight) block[downRight].id.style.background = "#BA7A3A";
-	if(downLeft) block[downLeft].id.style.background = "#BA7A3A";
-	if(upRight) block[upRight].id.style.background = "#BA7A3A";
-	if(upLeft) block[upLeft].id.style.background = "#BA7A3A";
-}
-		
-
-function makeMove (index) {
-	var isMove = false;
-	if(!selectedPiece) 
-		return false;
-	if(index != upLeft && index != upRight && index != downLeft && index != downRight){
-		erase_roads(0);
-		selectedPiece = undefined;
-		return false;
-	}
-
-	if(the_checker[1].color=="white"){
-		cpy_downRight = upRight;
-		cpy_downLeft = upLeft;
-		cpy_upLeft = downLeft;
-		cpy_upRight = downRight;
-	}
-	else{
-		cpy_downRight = upLeft;
-		cpy_downLeft = upRight;
-		cpy_upLeft = downRight;
-		cpy_upRight = downLeft;
-	}  
-
-	if(mustAttack) 
-		multiplier = 2;
-	else
-		multiplier = 1;
-
-
-		if(index == cpy_upRight){
-			isMove = true;		
-			if(the_checker[1].color=="white"){
-				executeMove( multiplier * 1, multiplier * 1, multiplier * 9 );
-				if(mustAttack) eliminateCheck(index - 9);
-			}
-			else{
-				executeMove( multiplier * 1, multiplier * -1, multiplier * -7);
-				if(mustAttack) eliminateCheck( index + 7 );
-			}
-		}
-
-		if(index == cpy_upLeft){
-	
-			isMove = true;
-			if(the_checker[1].color=="white"){
-				executeMove( multiplier * -1, multiplier * 1, multiplier * 7);
-			 	if(mustAttack)	eliminateCheck(index - 7 );				
-			}
-			else{
-				executeMove( multiplier * -1, multiplier * -1, multiplier * -9);
-				if (mustAttack) eliminateCheck( index + 9 );
-			}
-		}
-
-		if(the_checker[selectedPieceindex].king){
-
-			if(index == cpy_downRight){
-				isMove = true;
-				if(the_checker[1].color=="white"){
-					executeMove( multiplier * 1, multiplier * -1, multiplier * -7);
-					if(mustAttack) eliminateCheck ( index  + 7) ;
-				}
-				else{
-					executeMove( multiplier * 1, multiplier * 1, multiplier * 9);
-					if(mustAttack) eliminateCheck ( index  - 9) ;
-				}
-			}
-
-		if(index == cpy_downLeft){
-			isMove = true;
-				if(the_checker[1].color=="white"){
-					executeMove( multiplier * -1, multiplier * -1, multiplier * -9);
-					if(mustAttack) eliminateCheck ( index  + 9) ;
-				}
-				else{
-					executeMove( multiplier * -1, multiplier * 1, multiplier * 7);
-					if(mustAttack) eliminateCheck ( index  - 7) ;
-				}
-			}
-		}
-
+	playSound(moveSound);
 	erase_roads(0);
-	the_checker[selectedPieceindex].checkIfKing();
 
-	if (isMove) {
-			playSound(moveSound);
-			anotherMove = undefined;
-		 if(mustAttack) {
-			 	anotherMove = attackMoves(the_checker[selectedPieceindex]);
-		 }
-		if (anotherMove){
-			oneMove = the_checker[selectedPieceindex];
-			showMoves(oneMove);
+	if(piece.id[0] == 'w'){
+		selectedPiece = w_checker[index+1];
+		selectedPieceindex = index+1;
+		
+	}else{
+		selectedPiece = b_checker[index+1];
+		selectedPieceindex = index+1;
+	}
+	
+	upRight = getSquare(selectedPiece.top - moveLength, selectedPiece.left + moveLength);
+	upLeft = getSquare(selectedPiece.top - moveLength, selectedPiece.left - moveLength);
+	downRight = getSquare(selectedPiece.top + moveLength, selectedPiece.left + moveLength);
+	downLeft = getSquare(selectedPiece.top + moveLength, selectedPiece.left - moveLength);
+	
+	tableLimit = 5*moveLength;
+	reverse_tableLimit = 3*moveLength;
+	moveUpLeft = getSquare(selectedPiece.top - 2*moveLength, selectedPiece.left - 2*moveLength);
+	moveUpRight = getSquare(selectedPiece.top - 2*moveLength, selectedPiece.left + 2*moveLength);
+	moveDownLeft = getSquare(selectedPiece.top + 2*moveLength, selectedPiece.left - 2*moveLength);
+	moveDownRight = getSquare(selectedPiece.top + 2*moveLength, selectedPiece.left + 2*moveLength);
+	tableLimitLeft = 1*moveLength;
+	tableLimitRight = 6*moveLength;
+
+	//attack
+	if(selectedPiece.color == "white" || selectedPiece.king){
+		if(upRight && upRight.occupier == "black" && selectedPiece.top > moveLength && selectedPiece.left < tableLimitRight && getSquare(selectedPiece.top - 2*moveLength, selectedPiece.left + 2*moveLength) && !getSquare(selectedPiece.top - 2*moveLength, selectedPiece.left + 2*moveLength).occupier){
+			getSquare(selectedPiece.top - 2*moveLength, selectedPiece.left + 2*moveLength).element.style.backgroundColor = "lightgreen";
+			mustAttack = true;
+			upRight.element.style.boxShadow = "0 0 15px orange";
 		}
-		else{
-			oneMove = undefined;
-		 	changeTurns(the_checker[1]);
-		 	gameOver = checkIfLost();
-		 	if(gameOver) { setTimeout( declareWinner(),3000 ); return false};
-		 	gameOver = checkForMoves();
-		 	if(gameOver) { setTimeout( declareWinner() ,3000) ; return false};
+		if(upLeft && upLeft.occupier == "black" && selectedPiece.top > moveLength && selectedPiece.left > tableLimitLeft && getSquare(selectedPiece.top - 2*moveLength, selectedPiece.left - 2*moveLength) && !getSquare(selectedPiece.top - 2*moveLength, selectedPiece.left - 2*moveLength).occupier){
+			getSquare(selectedPiece.top - 2*moveLength, selectedPiece.left - 2*moveLength).element.style.backgroundColor = "lightgreen";
+			mustAttack = true;
+			upLeft.element.style.boxShadow = "0 0 15px orange";
+		}
+	}
+	if(selectedPiece.color == "black" || selectedPiece.king){
+		if(downRight && downRight.occupier == "white" && selectedPiece.top < tableLimit && selectedPiece.left < tableLimitRight && getSquare(selectedPiece.top + 2*moveLength, selectedPiece.left + 2*moveLength) && !getSquare(selectedPiece.top + 2*moveLength, selectedPiece.left + 2*moveLength).occupier){
+			getSquare(selectedPiece.top + 2*moveLength, selectedPiece.left + 2*moveLength).element.style.backgroundColor = "lightgreen";
+			mustAttack = true;
+			downRight.element.style.boxShadow = "0 0 15px orange";
+		}
+		if(downLeft && downLeft.occupier == "white" && selectedPiece.top < tableLimit && selectedPiece.left > tableLimitLeft && getSquare(selectedPiece.top + 2*moveLength, selectedPiece.left - 2*moveLength) && !getSquare(selectedPiece.top + 2*moveLength, selectedPiece.left - 2*moveLength).occupier){
+			getSquare(selectedPiece.top + 2*moveLength, selectedPiece.left - 2*moveLength).element.style.backgroundColor = "lightgreen";
+			mustAttack = true;
+			downLeft.element.style.boxShadow = "0 0 15px orange";
+		}
+	}
+	
+	//move
+	if(!mustAttack){
+		if(selectedPiece.color == "white" || selectedPiece.king){
+			if(upRight && !upRight.occupier && selectedPiece.top > 0 && selectedPiece.left < 7*moveLength){
+				upRight.element.style.backgroundColor = "lightgreen";
+			}
+			if(upLeft && !upLeft.occupier && selectedPiece.top > 0 && selectedPiece.left > 0){
+				upLeft.element.style.backgroundColor = "lightgreen";
+			}
+		}
+		if(selectedPiece.color == "black" || selectedPiece.king){
+			if(downRight && !downRight.occupier && selectedPiece.top < 7*moveLength && selectedPiece.left < 7*moveLength){
+				downRight.element.style.backgroundColor = "lightgreen";
+			}
+			if(downLeft && !downLeft.occupier && selectedPiece.top < 7*moveLength && selectedPiece.left > 0){
+				downLeft.element.style.backgroundColor = "lightgreen";
+			}
+		}
+	}
+	
+	if(mustAttack)
+		if(!checkIfMustAttack())
+			mustAttack = false;
+	
+}
+
+function movePiece(square){
+	if(square.style.backgroundColor != "lightgreen")
+		return;
+	
+	playSound(moveSound);
+	selectedPiece.element.style.top = square.top + moveDeviation + "px";
+	selectedPiece.element.style.left = square.left + moveDeviation + "px";
+	
+	getSquare(selectedPiece.top,selectedPiece.left).occupier = null;
+	selectedPiece.top = square.top;
+	selectedPiece.left = square.left;
+	square.occupier = selectedPiece.color;
+	
+	erase_roads(0);
+	
+	//attack
+	var i;
+	for(i=1; i<=2; i++){
+		if(i==1){
+			oneMove = Math.abs(selectedPiece.top - moveUpRight.top) + Math.abs(selectedPiece.left - moveUpRight.left) == 4*moveLength;
+			anotherMove = Math.abs(square.top - moveUpRight.top) + Math.abs(square.left - moveUpRight.left) == 2*moveLength;
+		}else{
+			oneMove = Math.abs(selectedPiece.top - moveUpLeft.top) + Math.abs(selectedPiece.left - moveUpLeft.left) == 4*moveLength;
+			anotherMove = Math.abs(square.top - moveUpLeft.top) + Math.abs(square.left - moveUpLeft.left) == 2*moveLength;
+		}
+		if(selectedPiece.color == "white" && oneMove && anotherMove){
+			if(getSquare(selectedPiece.top + moveLength, selectedPiece.left - moveLength) && getSquare(selectedPiece.top + moveLength, selectedPiece.left - moveLength).occupier == "black"){
+				getSquare(selectedPiece.top + moveLength, selectedPiece.left - moveLength).occupier = null;
+				removeChecker(b_checker, getSquare(selectedPiece.top + moveLength, selectedPiece.left - moveLength).element.id);
+				
+			}else if(getSquare(selectedPiece.top + moveLength, selectedPiece.left + moveLength) && getSquare(selectedPiece.top + moveLength, selectedPiece.left + moveLength).occupier == "black"){
+				getSquare(selectedPiece.top + moveLength, selectedPiece.left + moveLength).occupier = null;
+				removeChecker(b_checker, getSquare(selectedPiece.top + moveLength, selectedPiece.left + moveLength).element.id);
+			}
+			
+		}
+
+		if(i==1){
+			oneMove = Math.abs(selectedPiece.top - moveDownRight.top) + Math.abs(selectedPiece.left - moveDownRight.left) == 4*moveLength;
+			anotherMove = Math.abs(square.top - moveDownRight.top) + Math.abs(square.left - moveDownRight.left) == 2*moveLength;
+		}else{
+			oneMove = Math.abs(selectedPiece.top - moveDownLeft.top) + Math.abs(selectedPiece.left - moveDownLeft.left) == 4*moveLength;
+			anotherMove = Math.abs(square.top - moveDownLeft.top) + Math.abs(square.left - moveDownLeft.left) == 2*moveLength;
+		}
+		if(selectedPiece.color == "black" && oneMove && anotherMove){
+			if(getSquare(selectedPiece.top - moveLength, selectedPiece.left - moveLength) && getSquare(selectedPiece.top - moveLength, selectedPiece.left - moveLength).occupier == "white"){
+				getSquare(selectedPiece.top - moveLength, selectedPiece.left - moveLength).occupier = null;
+				removeChecker(w_checker, getSquare(selectedPiece.top - moveLength, selectedPiece.left - moveLength).element.id);
+			}else if(getSquare(selectedPiece.top - moveLength, selectedPiece.left + moveLength) && getSquare(selectedPiece.top - moveLength, selectedPiece.left + moveLength).occupier == "white"){
+				getSquare(selectedPiece.top - moveLength, selectedPiece.left + moveLength).occupier = null;
+				removeChecker(w_checker, getSquare(selectedPiece.top - moveLength, selectedPiece.left + moveLength).element.id);
+			}
+		}
+	}
+	//king
+	if(selectedPiece.color == "white" && selectedPiece.top == 0){
+		selectedPiece.element.style.border = "4px solid gold";
+		selectedPiece.king = true;
+	}
+	if(selectedPiece.color == "black" && selectedPiece.top == 7*moveLength){
+		selectedPiece.element.style.border = "4px solid gold";
+		selectedPiece.king = true;
+	}
+
+	if(!checkIfLost()){
+		if(mustAttack){
+			if(checkIfMustAttack()){
+				selectPiece(selectedPiece.element, selectedPieceindex-1);
+				mustAttack = false;
+				return;
+			}
+		}
+		changeTurns(selectedPiece);
+		if(checkForMoves())
+			declareWinner();
+	}else{
+		declareWinner();
+	}
+	mustAttack = false;
+}
+
+function getSquare(top, left){
+	var i,j;
+	for(i=1; i<=8; i++)
+		for(j=1; j<=8; j++)
+			if(block[i][j].top == top && block[i][j].left == left)
+				return block[i][j];
+	return false;
+}
+
+function removeChecker(arr, id){
+	var i;
+	for(i=1; i<arr.length; i++){
+		if(arr[i].element.id == id){
+			arr[i].element.remove();
+			arr[i].alive = false;
+			return;
 		}
 	}
 }
 
-
-
-function executeMove (X,Y,nSquare){
-	the_checker[selectedPieceindex].changeCoord(X,Y); 
-	the_checker[selectedPieceindex].setCoord(0,0);
-	block[the_checker[selectedPieceindex].ocupied_square].ocupied = false;			
-	block[the_checker[selectedPieceindex].ocupied_square + nSquare].ocupied = true;
-	block[the_checker[selectedPieceindex].ocupied_square + nSquare].pieceId = 	block[the_checker[selectedPieceindex].ocupied_square ].pieceId;
-	block[the_checker[selectedPieceindex].ocupied_square ].pieceId = undefined; 	
-	the_checker[selectedPieceindex].ocupied_square += nSquare;
-
-}
-
-function checkMove(Apiece,tLimit,tLimit_Side,moveDirection,theDirection){
-	if(Apiece.coordY != tLimit){
-		if(Apiece.coordX != tLimit_Side && !block[ Apiece.ocupied_square + moveDirection ].ocupied){
-			block[ Apiece.ocupied_square + moveDirection ].id.style.background = "#704923";
-			theDirection = Apiece.ocupied_square + moveDirection;
+function erase_roads(multiplier){
+	var i,j;
+	for(i=1; i<=8; i++)
+		for(j=1; j<=8; j++){
+			if(i%2 != j%2){
+				block[i][j].element.style.backgroundColor = "black";
+				block[i][j].element.style.boxShadow = "";
+			}
+			else{
+				block[i][j].element.style.backgroundColor = "white";
+				block[i][j].element.style.boxShadow = "";
+			}
 		}
-	else
-			theDirection = undefined;
-	}
-	else
-		theDirection = undefined;
-	return theDirection;
-}
 
-
-
-function  checkAttack( check , X, Y , negX , negY, squareMove, direction){
-	if(check.coordX * negX >= 	X * negX && check.coordY *negY <= Y * negY && block[check.ocupied_square + squareMove ].ocupied && block[check.ocupied_square + squareMove].pieceId.color != check.color && !block[check.ocupied_square + squareMove * 2 ].ocupied){
-		mustAttack = true;
-		direction = check.ocupied_square +  squareMove*2 ;
-		block[direction].id.style.background = "#704923";
-		return direction ;
-	}
-	else
-		direction =  undefined;
-		return direction;
-}
-
-function eliminateCheck(indexx){
-	if(indexx < 1 || indexx > 64)
-		return  0;
-
-	var x =block[ indexx ].pieceId ;
-	x.alive =false;
-	block[ indexx ].ocupied = false;
-	x.id.style.display  = "none";
-}
-
- 	
-function attackMoves(ckc){
-
- 		upRight = undefined;
- 		upLeft = undefined;
- 		downRight = undefined;
- 		downLeft = undefined;
-
- 	if(ckc.king ){
- 		if(ckc.color == "white"){
-			upRight = checkAttack( ckc , 6, 3 , -1 , -1 , -7, upRight );
-			upLeft = checkAttack( ckc, 3 , 3 , 1 , -1 , -9 , upLeft );
+	if(multiplier){
+		for(i=0; i<white_checker_class.length; i++){
+			if(w_checker[i+1].alive)
+				w_checker[i+1].element.style.boxShadow = "0 0 15px orange";
 		}
-		else{
-	 		downLeft = checkAttack( ckc , 3, 6, 1 , 1 , 7 , downLeft );
-			downRight = checkAttack( ckc , 6 , 6 , -1, 1 ,9 , downRight );		
+		for(i=0; i<black_checker_class.length; i++){
+			if(b_checker[i+1].alive)
+				b_checker[i+1].element.style.boxShadow = "0 0 15px orange";
 		}
 	}
-	if(ckc.color == "white"){
-	 	downLeft = checkAttack( ckc , 3, 6, 1 , 1 , 7 , downLeft );
-		downRight = checkAttack( ckc , 6 , 6 , -1, 1 ,9 , downRight );
+}
+
+function checkIfMustAttack(){
+	
+	upRight = getSquare(selectedPiece.top - moveLength, selectedPiece.left + moveLength);
+	upLeft = getSquare(selectedPiece.top - moveLength, selectedPiece.left - moveLength);
+	downRight = getSquare(selectedPiece.top + moveLength, selectedPiece.left + moveLength);
+	downLeft = getSquare(selectedPiece.top + moveLength, selectedPiece.left - moveLength);
+
+	tableLimit = 5*moveLength;
+	reverse_tableLimit = 3*moveLength;
+	moveUpLeft = getSquare(selectedPiece.top - 2*moveLength, selectedPiece.left - 2*moveLength);
+	moveUpRight = getSquare(selectedPiece.top - 2*moveLength, selectedPiece.left + 2*moveLength);
+	moveDownLeft = getSquare(selectedPiece.top + 2*moveLength, selectedPiece.left - 2*moveLength);
+	moveDownRight = getSquare(selectedPiece.top + 2*moveLength, selectedPiece.left + 2*moveLength);
+	tableLimitLeft = 1*moveLength;
+	tableLimitRight = 6*moveLength;
+
+	if(selectedPiece.color == "white" || selectedPiece.king){
+		if(upRight && upRight.occupier == "black" && selectedPiece.top > moveLength && selectedPiece.left < tableLimitRight && moveUpRight && !moveUpRight.occupier)
+			return true;
+		if(upLeft && upLeft.occupier == "black" && selectedPiece.top > moveLength && selectedPiece.left > tableLimitLeft && moveUpLeft && !moveUpLeft.occupier)
+			return true;
 	}
-	else{
-		upRight = checkAttack( ckc , 6, 3 , -1 , -1 , -7, upRight );
-		upLeft = checkAttack( ckc, 3 , 3 , 1 , -1 , -9 , upLeft );
+	if(selectedPiece.color == "black" || selectedPiece.king){
+		if(downRight && downRight.occupier == "white" && selectedPiece.top < tableLimit && selectedPiece.left < tableLimitRight && moveDownRight && !moveDownRight.occupier)
+			return true;
+		if(downLeft && downLeft.occupier == "white" && selectedPiece.top < tableLimit && selectedPiece.left > tableLimitLeft && moveDownLeft && !moveDownLeft.occupier)
+			return true;
 	}
- 	
- 	if(ckc.color== "black" && (upRight || upLeft || downLeft || downRight ) ) {
-	 	var p = upLeft;
-	 	upLeft = downLeft;
-	 	downLeft = p;
-
-	 	p = upRight;
-	 	upRight = downRight;
-	 	downRight = p;
-
-	 	p = downLeft ;
-	 	downLeft = downRight;
-	 	downRight = p;
-
-	 	p = upRight ;
-	 	upRight = upLeft;
-	 	upLeft = p;
- 	}
- 	if(upLeft != undefined || upRight != undefined || downRight != undefined || downLeft != undefined){
- 		return true;
-
- 	}
- 	return false;
+	return false;
 }
 
 function changeTurns(ckc){
-		if(ckc.color=="white")
-	the_checker = b_checker;
-else
-	the_checker = w_checker;
- }
+	if(ckc.color=="white")
+		the_checker = b_checker;
+	else
+		the_checker = w_checker;
+}
 
 function checkIfLost(){
 	var i;
@@ -453,59 +390,96 @@ function  checkForMoves(){
 	return true;
 }
 
+function showMoves(id){
+	if(id[0] == 'w'){
+		var piece = w_checker[parseInt(id.slice(2))];
+	}else{
+		var piece = b_checker[parseInt(id.slice(2))];
+	}
+
+	selectedPiece = piece;
+
+	upRight = getSquare(selectedPiece.top - moveLength, selectedPiece.left + moveLength);
+	upLeft = getSquare(selectedPiece.top - moveLength, selectedPiece.left - moveLength);
+	downRight = getSquare(selectedPiece.top + moveLength, selectedPiece.left + moveLength);
+	downLeft = getSquare(selectedPiece.top + moveLength, selectedPiece.left - moveLength);
+
+	tableLimit = 5*moveLength;
+	reverse_tableLimit = 3*moveLength;
+	moveUpLeft = getSquare(selectedPiece.top - 2*moveLength, selectedPiece.left - 2*moveLength);
+	moveUpRight = getSquare(selectedPiece.top - 2*moveLength, selectedPiece.left + 2*moveLength);
+	moveDownLeft = getSquare(selectedPiece.top + 2*moveLength, selectedPiece.left - 2*moveLength);
+	moveDownRight = getSquare(selectedPiece.top + 2*moveLength, selectedPiece.left + 2*moveLength);
+	tableLimitLeft = 1*moveLength;
+	tableLimitRight = 6*moveLength;
+
+	//attack
+	if(selectedPiece.color == "white" || selectedPiece.king){
+		if(upRight && upRight.occupier == "black" && selectedPiece.top > moveLength && selectedPiece.left < tableLimitRight && moveUpRight && !moveUpRight.occupier){
+			selectedPiece = null;
+			return true;
+		}
+		if(upLeft && upLeft.occupier == "black" && selectedPiece.top > moveLength && selectedPiece.left > tableLimitLeft && moveUpLeft && !moveUpLeft.occupier){
+			selectedPiece = null;
+			return true;
+		}
+	}
+	if(selectedPiece.color == "black" || selectedPiece.king){
+		if(downRight && downRight.occupier == "white" && selectedPiece.top < tableLimit && selectedPiece.left < tableLimitRight && moveDownRight && !moveDownRight.occupier){
+			selectedPiece = null;
+			return true;
+		}
+		if(downLeft && downLeft.occupier == "white" && selectedPiece.top < tableLimit && selectedPiece.left > tableLimitLeft && moveDownLeft && !moveDownLeft.occupier){
+			selectedPiece = null;
+			return true;
+		}
+	}
+
+	//move
+	if(!mustAttack){
+		if(selectedPiece.color == "white" || selectedPiece.king){
+			if(upRight && !upRight.occupier && selectedPiece.top > 0 && selectedPiece.left < 7*moveLength){
+				selectedPiece = null;
+				return true;
+			}
+			if(upLeft && !upLeft.occupier && selectedPiece.top > 0 && selectedPiece.left > 0){
+				selectedPiece = null;
+				return true;
+			}
+		}
+		if(selectedPiece.color == "black" || selectedPiece.king){
+			if(downRight && !downRight.occupier && selectedPiece.top < 7*moveLength && selectedPiece.left < 7*moveLength){
+				selectedPiece = null;
+				return true;
+			}
+			if(downLeft && !downLeft.occupier && selectedPiece.top < 7*moveLength && selectedPiece.left > 0){
+				selectedPiece = null;
+				return true;
+			}
+		}
+	}
+	selectedPiece = null;
+	return false;
+}
+
 function declareWinner(){
 	playSound(winSound);
 	score.style.display = "block";
-0
-if(the_checker[1].color == "white")
-	score.innerHTML = "Preto Ganhou!";
-else
-	score.innerHTML = "Vermelho Ganhou!";
+
+	if(the_checker[1].color == "white")
+		score.innerHTML = "Preto Ganhou!";
+	else
+		score.innerHTML = "Branco Ganhou!";
+	gameOver = 1;
+
+	// Reinicia o jogo após 5 segundos
+	setTimeout(function() {
+        if (gameOver) {
+            window.location.reload();
+        }
+    }, 5000);
 }
 
 function playSound(sound){
 	if(sound) sound.play();
 }
-
-
-function getDimension (){
-	contor ++;
- windowHeight = window.innerHeight
-	|| document.documentElement.clientHeight
-	|| document.body.clientHeight;  ;
- windowWidth =  window.innerWidth
-	|| document.documentElement.clientWidth
-	|| document.body.clientWidth;
-}
-
-
-
-
-document.getElementsByTagName("BODY")[0].onresize = function(){
-
-	getDimension();
-	var cpy_bigScreen = bigScreen ;
-
-if(windowWidth < 650){
-		moveLength = 50;
-		moveDeviation = 6; 
-		if(bigScreen == 1) bigScreen = -1;
-	}
-if(windowWidth > 650){
-		moveLength = 80;
-		moveDeviation = 10; 
-		if(bigScreen == -1) bigScreen = 1;
-	}
-
-	if(bigScreen !=cpy_bigScreen){
-	for(var i = 1; i <= 12; i++){
-		b_checker[i].setCoord(0,0);
-		w_checker[i].setCoord(0,0);
-	}
-	}
-}
-
-
-
-
-

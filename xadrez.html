@@ -6,8 +6,7 @@
     <meta charset="UTF-8">
     <meta http-equiv="X-UA-Compatible" content="IE=edge">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <link rel="stylesheet" href="site-geral.css">
-    <link rel="stylesheet" href="xadrez.css"> 
+    <link rel="stylesheet" href="site-geral.css"> 
 </head>
 <body>
     <header class="site-header">
@@ -26,21 +25,70 @@
     <main class="main-content">
         <div class="game-area">
             <h1> Xadrez </h1>
+            
             <h2 id="tog">Turno: Branco</h2>
 
-            <ul class="chess-board" id="board">
+            <div class="chess-board">
                 <div class="divv" id="row8">
-                    <li class="box" id="b801">BRook</li>
-                    <li class="box" id="b802">BKnight</li>
-                    </div>
+                    <li class="box Brook" id="b801">Brook</li>
+                    <li class="box Bknight" id="b802">Bknight</li>
+                    <li class="box Bbishop" id="b803">Bbishop</li>
+                    <li class="box Bqueen" id="b804">Bqueen</li>
+                    <li class="box Bking" id="b805">Bking</li>
+                    <li class="box Bbishop" id="b806">Bbishop</li>
+                    <li class="box Bknight" id="b807">Bknight</li>
+                    <li class="box Brook" id="b808">Brook</li>
+                </div>
+                <div class="divv" id="row7">
+                    <li class="box Bpawn" id="b701">Bpawn</li>
+                    <li class="box Bpawn" id="b702">Bpawn</li>
+                    <li class="box Bpawn" id="b703">Bpawn</li>
+                    <li class="box Bpawn" id="b704">Bpawn</li>
+                    <li class="box Bpawn" id="b705">Bpawn</li>
+                    <li class="box Bpawn" id="b706">Bpawn</li>
+                    <li class="box Bpawn" id="b707">Bpawn</li>
+                    <li class="box Bpawn" id="b708">Bpawn</li>
+                </div>
+                <div class="divv" id="row6">
+                    <li class="box" id="b601"></li><li class="box" id="b602"></li><li class="box" id="b603"></li><li class="box" id="b604"></li>
+                    <li class="box" id="b605"></li><li class="box" id="b606"></li><li class="box" id="b607"></li><li class="box" id="b608"></li>
+                </div>
+                <div class="divv" id="row5">
+                    <li class="box" id="b501"></li><li class="box" id="b502"></li><li class="box" id="b503"></li><li class="box" id="b504"></li>
+                    <li class="box" id="b505"></li><li class="box" id="b506"></li><li class="box" id="b507"></li><li class="box" id="b508"></li>
+                </div>
+                <div class="divv" id="row4">
+                    <li class="box" id="b401"></li><li class="box" id="b402"></li><li class="box" id="b403"></li><li class="box" id="b404"></li>
+                    <li class="box" id="b405"></li><li class="box" id="b406"></li><li class="box" id="b407"></li><li class="box" id="b408"></li>
+                </div>
+                <div class="divv" id="row3">
+                    <li class="box" id="b301"></li><li class="box" id="b302"></li><li class="box" id="b303"></li><li class="box" id="b304"></li>
+                    <li class="box" id="b305"></li><li class="box" id="b306"></li><li class="box" id="b307"></li><li class="box" id="b308"></li>
+                </div>
+                <div class="divv" id="row2">
+                    <li class="box Wpawn" id="b201">Wpawn</li><li class="box Wpawn" id="b202">Wpawn</li><li class="box Wpawn" id="b203">Wpawn</li>
+                    <li class="box Wpawn" id="b204">Wpawn</li><li class="box Wpawn" id="b205">Wpawn</li><li class="box Wpawn" id="b206">Wpawn</li>
+                    <li class="box Wpawn" id="b207">Wpawn</li><li class="box Wpawn" id="b208">Wpawn</li>
+                </div>
                 <div class="divv" id="row1">
-                    <li class="box" id="b101">WRook</li>
-                    <li class="box" id="b102">WKnight</li>
-                    </div>
-            </ul>
-            <button id="resetBtn"> Reiniciar Jogo </button>
-        </div>
+                    <li class="box Wrook" id="b101">Wrook</li>
+                    <li class="box Wknight" id="b102">Wknight</li>
+                    <li class="box Wbishop" id="b103">Wbishop</li>
+                    <li class="box Wqueen" id="b104">Wqueen</li>
+                    <li class="box Wking" id="b105">Wking</li>
+                    <li class="box Wbishop" id="b106">Wbishop</li>
+                    <li class="box Wknight" id="b107">Wknight</li>
+                    <li class="box Wrook" id="b108">Wrook</li>
+                </div>
+            </div>
+            
+            <button onclick="window.location.reload()"> Reiniciar Jogo </button>
+            <button id="undoBtn"> Desfazer Jogada </button>
+            </div>
     </main>
+    
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/chess-icons/1.0.1/css/chess-icons.min.css">
+    
     <script src="xadrez.js"></script>
 </body>
 </html>

@@ -1,12 +1,13 @@
 <!DOCTYPE html>
-<html>
+<html lang="pt">
 <head>
     <link rel="icon" href="https://i.postimg.cc/8cKvqZR6/Yellow-Blue-Retro-Dice-Game-Logo-7-removebg-preview.png">
     <title>Board N Play - Sudoku</title>
     <meta charset="UTF-8">
-	<meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <link rel="stylesheet" href="site-geral.css">
-    <link rel="stylesheet" href="sudoku.css"> </head>
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <link rel="stylesheet" href="site-geral.css"> 
+    <script src="sudoku3.js"></script> </head>
 <body>
     <header class="site-header">
         <img src="https://i.postimg.cc/Y0Mj2ZNP/Yellow-Blue-Retro-Dice-Game-Logo.png" class="logo" alt="Board N Play Logo" />
@@ -20,35 +21,40 @@
             </ul>
         </nav>
     </header>
-
-	<main class="main-content">
-	
-        <h1> Sudoku </h1>
-	
-        <div class="game-area wrap">
-            <label for="toggleCandidates"> Ajudas: </label>
-            <input id="toggleCandidates" class="js-candidate-toggle" type="checkbox"/>
-            <br><br>
-
-            <div class="control-group">
-                <span>Novo:</span>
-                <button type="button" class="sudokubutton1 js-generate-board-btn--easy">Fácil</button>
-                <button type="button" class="sudokubutton2 js-generate-board-btn--medium">Médio</button>
-                <button type="button" class="sudokubutton3 js-generate-board-btn--hard">Difícil</button>
-                <button type="button" class="sudokubutton4 js-generate-board-btn--very-hard">Muito Difícil</button>
-            </div>
-
-            <div id="sudoku" class="sudoku-board">
-                </div>
-
-            <div class="control-group">
-                <span>Resolver:</span>
-                <button type="button" class="sudokubutton5 js-solve-step-btn"> 1 Passo </button>
-                <button type="button" class="sudokubutton6 js-solve-all-btn"> Todos </button>
+    
+    <main class="main-content">
+        <div class="game-area">
+            <h1> Sudoku </h1>
+            
+            <div class="wrap">
+                <label for="toggleCandidates"> Ajudas: </label>
+                <input id="toggleCandidates" type="checkbox" class="js-candidate-toggle">
             </div>
             
-            <button type="button" class="sudokubutton7 js-clear-board-btn"> Apagar </button>
+            <br>
+            
+            <div id="sudoku" class="sudoku-board" data-board-size="9"> 
+                </div>
+
+            <div class="sudoku-controls">
+                <p> **Dificuldade** </p>
+                <button type="button" class="sudokubutton1 js-generate-board-btn--easy"> Fácil </button>
+                <button type="button" class="sudokubutton2 js-generate-board-btn--medium"> Médio </button>
+                <button type="button" class="sudokubutton3 js-generate-board-btn--hard"> Difícil </button>
+                <button type="button" class="sudokubutton4 js-generate-board-btn--very-hard"> Muito Difícil </button>
+            </div>
+
+            <div class="sudoku-controls">
+                <p> **Resolver** </p>
+                <button type="button" class="sudokubutton5 js-solve-step-btn"> Passo a Passo </button>
+                <button type="button" class="sudokubutton6 js-solve-all-btn"> Todos </button>
+                <br>
+                <button type="button" class="sudokubutton7 js-clear-board-btn"> Apagar </button>
+            </div>
         </div>
-        </main>
+    </main>
+    
+    <script src="sudoku2.js"></script>
+    <script src="sudoku.js"></script>
 </body>
 </html>

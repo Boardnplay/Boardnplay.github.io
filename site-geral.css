@@ -1,272 +1,477 @@
-:root {
-    /* Cores */
-    --color-primary: #007bff; /* Azul de Destaque */
-    --color-dark: #2c3e50; /* Fundo Escuro Principal */
-    --color-light: #ecf0f1; /* Texto Claro */
-    --color-accent-green: #28a745; /* Botões de Ação */
-    --color-board-dark: #b58863; /* Tabuleiro Escuro */
-    --color-board-light: #f0d9b5; /* Tabuleiro Claro */
-}
-
-/* Reset Básico */
 * {
     margin: 0;
     padding: 0;
     box-sizing: border-box;
+    font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+}
+
+html, body {
+    width: 100%;
+    min-height: 100vh;
+    background-color: #f0f0f0;
+    color: #333;
+    scroll-behavior: smooth;
 }
 
 body {
-    font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
-    background-color: var(--color-dark);
-    color: var(--color-light);
-    line-height: 1.6;
-    min-height: 100vh;
+    padding-top: 80px;
 }
 
-/* Estrutura do Cabeçalho e Navegação */
 .site-header {
-    background-color: #1a252f;
-    padding: 10px 0;
-    border-bottom: 3px solid var(--color-primary);
-    text-align: center;
+    background-color: #2c3e50;
+    color: white;
+    padding: 10px 20px;
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100%;
+    z-index: 1000;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
 }
 
 .logo {
-    display: block;
-    margin: 0 auto 10px;
-    width: 200px;
-    height: auto;
+    height: 60px;
+    filter: drop-shadow(0 0 5px rgba(255, 255, 255, 0.2));
 }
 
 .main-nav ul {
     list-style: none;
     display: flex;
-    justify-content: center;
-    padding: 0;
-    margin: 0;
-    flex-wrap: wrap;
 }
 
-.main-nav li {
-    margin: 0 15px;
+.main-nav ul li {
+    margin-left: 20px;
 }
 
-.main-nav a {
-    color: var(--color-light);
+.main-nav ul li a {
+    color: white;
     text-decoration: none;
-    font-weight: 600;
-    padding: 8px 12px;
-    display: block;
-    border-radius: 4px;
+    font-size: 1.1em;
+    padding: 5px 10px;
+    border-radius: 5px;
     transition: background-color 0.3s, color 0.3s;
 }
 
-.main-nav a:hover,
-.main-nav a.active {
-    background-color: var(--color-primary);
-    color: white;
+.main-nav ul li a:hover,
+.main-nav ul li a.active {
+    background-color: #3498db;
+    color: #f0f0f0;
 }
 
-/* Conteúdo Principal e Tipografia */
 .main-content {
-    max-width: 1200px;
-    margin: 30px auto;
-    padding: 0 20px;
+    padding: 20px;
     text-align: center;
 }
 
-h1 {
-    color: var(--color-primary);
-    margin-bottom: 20px;
-    font-size: 2.5em;
-    text-transform: uppercase;
-    letter-spacing: 2px;
-}
-
-h2, h3, p {
-    color: var(--color-light);
-    margin: 15px auto;
-    max-width: 800px;
-}
-
-/* Estilos de Jogo Genéricos (Containers) */
 .game-area {
-    background-color: #34495e;
-    padding: 30px;
-    border-radius: 10px;
-    box-shadow: 0 0 15px rgba(0, 0, 0, 0.5);
-    display: inline-block;
     margin-top: 20px;
-}
-
-/* Botões Genéricos (Inclui todos os <button> e classes sudokubuttonX) */
-button, [class^="sudokubutton"] {
-    background-color: var(--color-accent-green);
-    color: white;
-    border: none;
-    padding: 10px 20px;
-    font-size: 1em;
-    font-weight: bold;
-    cursor: pointer;
-    border-radius: 5px;
-    margin: 5px;
-    transition: background-color 0.3s, transform 0.1s;
-    text-transform: uppercase;
-}
-
-button:hover, 
-[class^="sudokubutton"]:hover {
-    background-color: #1f8d42;
-    transform: translateY(-1px);
-}
-
-button:active,
-[class^="sudokubutton"]:active {
-    transform: translateY(1px);
-}
-
-button:disabled {
-    background-color: #555;
-    cursor: not-allowed;
-}
-
-/* === Estilo Específico para o Jogo do Galo (Tic-Tac-Toe) === */
-/* Utiliza #cellContainer, .cell, #statusText - Compatível com galo.js */
-#cellContainer {
-    display: grid;
-    grid-template-columns: repeat(3, 100px);
-    grid-template-rows: repeat(3, 100px);
-    gap: 5px;
-    margin: 20px auto;
-    background-color: var(--color-dark);
-    padding: 10px;
-    border-radius: 5px;
-}
-
-.cell {
-    width: 100px;
-    height: 100px;
     display: flex;
-    justify-content: center;
+    flex-direction: column;
     align-items: center;
-    font-size: 60px;
-    font-weight: bold;
-    color: var(--color-light);
-    background-color: #4a637d;
+}
+
+h1 {
+    color: #2980b9;
+    margin-bottom: 20px;
+    font-size: 2.2em;
+}
+
+.center {
+    display: block;
+    margin: 20px auto;
+}
+
+.grid-container {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+    gap: 30px;
+    max-width: 1200px;
+    margin: 40px auto;
+    padding: 0 20px;
+}
+
+.card {
+    background-color: white;
+    padding: 20px;
+    border-radius: 10px;
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+    transition: transform 0.3s;
+    text-align: center;
+}
+
+.card:hover {
+    transform: translateY(-5px);
+    box-shadow: 0 6px 15px rgba(0, 0, 0, 0.15);
+}
+
+.card h2 {
+    color: #2c3e50;
+    margin-bottom: 15px;
+}
+
+.card img {
+    max-width: 100%;
+    height: auto;
     border-radius: 5px;
-    cursor: pointer;
+    margin-bottom: 15px;
+}
+
+.card a.start-btn {
+    display: inline-block;
+    background-color: #2ecc71;
+    color: white;
+    padding: 10px 20px;
+    text-decoration: none;
+    border-radius: 5px;
+    margin-top: 10px;
     transition: background-color 0.3s;
 }
 
-.cell:hover {
-    background-color: #5d7897;
+.card a.start-btn:hover {
+    background-color: #27ae60;
+}
+
+button {
+    background-color: #3498db;
+    color: white;
+    border: none;
+    padding: 10px 20px;
+    margin: 10px 5px;
+    border-radius: 5px;
+    cursor: pointer;
+    font-size: 1em;
+    transition: background-color 0.3s;
+}
+
+button:hover {
+    background-color: #2980b9;
 }
 
 #statusText {
-    font-size: 1.8em;
-    color: #ffc107;
-    margin-bottom: 20px;
+    margin-bottom: 15px;
+    font-size: 1.2em;
+    font-weight: bold;
+    color: #e67e22;
 }
 
-/* === Estilo Específico para Xadrez e Damas (Tabuleiros 8x8) === */
-/* Utiliza .chess-board, .divv, .box, e .square - Compatível com xadrez.html e damas.js */
+.selected {
+    border: 3px solid gold !important;
+}
+
+.highlight {
+    background-color: #4CAF50 !important;
+    box-shadow: 0 0 10px #4CAF50;
+}
+
+/* JOGO DO GALO (TIC-TAC-TOE) STYLES */
+
+#cellContainer {
+    display: grid;
+    grid-template-columns: repeat(3, auto);
+    width: 180px;
+    margin: 20px auto;
+    border: 5px solid #333;
+    border-radius: 5px;
+    box-shadow: 0 0 20px rgba(0, 0, 0, 0.2);
+}
+
+.cell {
+    width: 60px;
+    height: 60px;
+    border: 2px solid #333;
+    line-height: 60px;
+    font-size: 40px;
+    cursor: pointer;
+    background-color: #ecf0f1;
+    transition: background-color 0.3s;
+}
+
+.cell:nth-child(3n) {
+    border-right: none;
+}
+
+.cell:nth-child(n+7) {
+    border-bottom: none;
+}
+
+.cell:nth-child(3n+1) {
+    border-left: none;
+}
+
+.cell:nth-child(-n+3) {
+    border-top: none;
+}
+
+.cell:hover {
+    background-color: #bdc3c7;
+}
+
+/* DAMAS STYLES */
+
+.damas-board, .chess-board {
+    position: relative;
+    width: 480px;
+    height: 480px;
+    margin: 20px auto;
+    border: 4px solid #333;
+    box-shadow: 0 0 20px rgba(0, 0, 0, 0.3);
+}
+
+.square, .box {
+    float: left;
+    width: 60px;
+    height: 60px;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    cursor: pointer;
+    transition: background-color 0.1s, box-shadow 0.1s;
+    font-size: 0;
+    list-style: none;
+}
+
+.white_square, .white_box {
+    background-color: #F0D2B4;
+}
+
+.black_square, .black_box {
+    background-color: #BA7A3A;
+}
+
+.clear_float {
+    clear: both;
+}
+
+.checker {
+    width: 50px;
+    height: 50px;
+    border-radius: 50%;
+    position: absolute;
+    border: 3px solid white;
+    cursor: pointer;
+    transition: top 0.3s, left 0.3s;
+    z-index: 5;
+}
+
+.white_checker {
+    background-color: #f7f7f7;
+    box-shadow: 0 3px 5px rgba(0, 0, 0, 0.5);
+}
+
+.black_checker {
+    background-color: #333;
+    box-shadow: 0 3px 5px rgba(0, 0, 0, 0.5);
+}
+
+#score {
+    position: absolute;
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%, -50%);
+    background-color: #1aaaad;
+    color: white;
+    display: none;
+    font-size: 2.5em;
+    font-weight: 900;
+    padding: 30px;
+    border-radius: 10px;
+    z-index: 8;
+    box-shadow: 0 0 20px rgba(0, 0, 0, 0.5);
+}
+
+/* XADREZ STYLES */
 
 .chess-board {
     display: flex;
-    flex-direction: column;
-    margin: 20px auto;
-    border: 5px solid #6d4c41;
-    box-shadow: 0 0 15px rgba(0, 0, 0, 0.7);
-    width: fit-content;
+    flex-direction: column-reverse;
 }
 
 .divv {
     display: flex;
 }
 
-/* Estilo Base para casas do Xadrez (.box) e Damas (.square) */
-.box, .square {
-    list-style: none;
-    width: 60px;
-    height: 60px;
-    display: flex;
-    justify-content: center;
-    align-items: center;
-    font-size: 0; /* Esconde texto como 'Wpawn' */
+.box {
+    font-size: 40px;
+    line-height: 60px;
     position: relative;
-    cursor: pointer;
 }
 
-/* Cores das casas do Xadrez (para estrutura .divv > .box) */
-.divv:nth-child(odd) .box:nth-child(even),
-.divv:nth-child(even) .box:nth-child(odd) {
-    background-color: var(--color-board-light); 
+.Wrook:before, .Wknight:before, .Wbishop:before, .Wqueen:before, .Wking:before, .Wpawn:before {
+    font-family: 'chess';
+    color: white;
+    text-shadow: 1px 1px 2px #000;
 }
 
-.divv:nth-child(odd) .box:nth-child(odd),
-.divv:nth-child(even) .box:nth-child(even) {
-    background-color: var(--color-board-dark);
+.Brook:before, .Bknight:before, .Bbishop:before, .Bqueen:before, .Bking:before, .Bpawn:before {
+    font-family: 'chess';
+    color: black;
+    text-shadow: 1px 1px 2px #FFF;
 }
 
-/* Cores das casas de Damas (para estrutura com classes explícitas) */
-.white_square {
-    background-color: var(--color-board-light);
-}
-.black_square {
-    background-color: var(--color-board-dark);
+.Wrook:before { content: "\u2656"; }
+.Wknight:before { content: "\u2658"; }
+.Wbishop:before { content: "\u2657"; }
+.Wqueen:before { content: "\u2655"; }
+.Wking:before { content: "\u2654"; }
+.Wpawn:before { content: "\u2659"; }
+
+.Brook:before { content: "\u265c"; }
+.Bknight:before { content: "\u265e"; }
+.Bbishop:before { content: "\u265d"; }
+.Bqueen:before { content: "\u265b"; }
+.Bking:before { content: "\u265a"; }
+.Bpawn:before { content: "\u265f"; }
+
+/* SUDOKU STYLES */
+
+.sudoku-board {
+    min-height: 22.75rem;
+    margin-top: 3px;
+    margin-bottom: 1em;
+    display: inline-block;
+    border: 2px solid #333;
+    box-shadow: 0 0 15px rgba(0, 0, 0, 0.2);
 }
 
-/* Peças e Destaques */
-.highlight {
-    box-shadow: inset 0 0 0 5px var(--color-primary);
+.sudoku-board-cell {
+    display: inline-block;
+    position: relative;
+    border: 1px solid #ddd;
+    background: white;
+    width: 53.33333px;
+    height: 53.33333px;
+    vertical-align: top;
+    text-align: center;
+    font-size: 2em;
+    line-height: 50px;
+    font-weight: bold;
 }
 
-.highlight-move {
-    background-color: rgba(40, 167, 69, 0.5) !important;
+.sudoku-board input {
+    border: none;
+    width: 100%;
+    height: 100%;
+    text-align: center;
+    font-size: 1em;
+    font-weight: bold;
+    color: #333;
+    background: transparent;
 }
 
-/* === Estilo Específico para Damas: Peças === */
-/* Damas.js utiliza .white_checker e .black_checker. Se usar imagens, mantenha o seu CSS original */
-.white_checker {
-    background-color: #f8f9fa; /* Branco */
-    border-radius: 50%;
-    box-shadow: 0 0 5px rgba(0,0,0,0.5);
-}
-.black_checker {
-    background-color: #343a40; /* Preto */
-    border-radius: 50%;
-    box-shadow: 0 0 5px rgba(0,0,0,0.5);
+.sudoku-board-cell:nth-of-type(9n+1) {
+    border-left-width: 2px;
+    border-left-color: #808080;
 }
 
-/* Responsividade Geral */
+.sudoku-board-cell:nth-of-type(n):nth-of-type(-n+9) {
+    border-top-width: 2px;
+    border-top-color: #808080;
+}
+
+.sudoku-board-cell:nth-of-type(3n) {
+    border-right-width: 2px;
+    border-right-color: #808080;
+}
+
+.sudoku-board-cell:nth-of-type(n+19):nth-of-type(-n+27),
+.sudoku-board-cell:nth-of-type(n+46):nth-of-type(-n+54) {
+    border-bottom-width: 2px;
+    border-bottom-color: #808080;
+}
+
+.sudoku-board .candidates {
+    font-size: 0.5em;
+    color: #888;
+    display: none;
+    line-height: 1.1;
+    padding-top: 5px;
+}
+
+.sudoku-board-cell--generated input {
+    color: #2980b9;
+    background-color: #ecf0f1;
+}
+
+.sudoku-controls {
+    margin-top: 20px;
+    padding: 10px;
+    border: 1px solid #ccc;
+    border-radius: 5px;
+    background-color: white;
+}
+
+.sudokubutton1 { background-color: #3cbf71; }
+.sudokubutton2 { background-color: #ff9224; }
+.sudokubutton3 { background-color: #ff3c3c; }
+.sudokubutton4 { background-color: #020202; }
+.sudokubutton5, .sudokubutton6 { background-color: #4040ff; }
+.sudokubutton7 { background-color: #899db6; }
+
+/* RESPONSIVIDADE (MOBILE) - Abaixo de 768px */
+
 @media (max-width: 768px) {
-    .logo { width: 150px; }
-    .main-nav li { margin: 5px; }
-    .main-nav a { padding: 5px 8px; font-size: 0.9em; }
-    h1 { font-size: 2em; }
-    
-    /* Galo Ajuste */
+    .site-header {
+        flex-direction: column;
+        height: auto;
+        padding: 10px;
+    }
+
+    .main-nav ul {
+        flex-wrap: wrap;
+        justify-content: center;
+        margin-top: 10px;
+    }
+
+    .main-nav ul li {
+        margin: 5px 10px;
+    }
+
+    body {
+        padding-top: 120px;
+    }
+
+    /* GALO - Reduz de 60px para 40px */
     #cellContainer {
-        grid-template-columns: repeat(3, 80px);
-        grid-template-rows: repeat(3, 80px);
+        width: 120px;
     }
+
     .cell {
-        width: 80px;
-        height: 80px;
-        font-size: 40px;
+        width: 40px;
+        height: 40px;
+        line-height: 40px;
+        font-size: 30px;
     }
-    
-    /* Xadrez/Damas Ajuste */
-    .box, .square {
+
+    /* DAMAS / XADREZ - Reduz de 60px para 40px */
+    .damas-board, .chess-board {
+        width: 320px;
+        height: 320px;
+    }
+
+    .square, .box {
         width: 40px;
         height: 40px;
     }
-}
 
-@media (max-width: 480px) {
-    .main-nav ul {
-        flex-direction: column;
-        align-items: center;
+    .checker {
+        width: 36px;
+        height: 36px;
+        border: 2px solid white;
     }
-    .main-nav li { margin: 5px 0; }
+
+    .box {
+        font-size: 28px;
+        line-height: 40px;
+    }
+
+    /* SUDOKU - Reduz o tamanho da célula */
+    .sudoku-board-cell {
+        width: 35.55555px;
+        height: 35.55555px;
+        font-size: 1.5em;
+        line-height: 34px;
+    }
 }
