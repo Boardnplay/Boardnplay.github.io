@@ -1,8 +1,11 @@
 :root {
-    --color-primary: #007bff;
-    --color-dark: #2c3e50;
-    --color-light: #ecf0f1;
-    --color-accent-green: #28a745;
+    /* Cores */
+    --color-primary: #007bff; /* Azul de Destaque */
+    --color-dark: #2c3e50; /* Fundo Escuro Principal */
+    --color-light: #ecf0f1; /* Texto Claro */
+    --color-accent-green: #28a745; /* Botões de Ação */
+    --color-board-dark: #b58863; /* Tabuleiro Escuro */
+    --color-board-light: #f0d9b5; /* Tabuleiro Claro */
 }
 
 /* Reset Básico */
@@ -96,7 +99,7 @@ h2, h3, p {
     margin-top: 20px;
 }
 
-/* Botões Genéricos */
+/* Botões Genéricos (Inclui todos os <button> e classes sudokubuttonX) */
 button, [class^="sudokubutton"] {
     background-color: var(--color-accent-green);
     color: white;
@@ -128,6 +131,7 @@ button:disabled {
 }
 
 /* === Estilo Específico para o Jogo do Galo (Tic-Tac-Toe) === */
+/* Utiliza #cellContainer, .cell, #statusText - Compatível com galo.js */
 #cellContainer {
     display: grid;
     grid-template-columns: repeat(3, 100px);
@@ -165,6 +169,7 @@ button:disabled {
 }
 
 /* === Estilo Específico para Xadrez e Damas (Tabuleiros 8x8) === */
+/* Utiliza .chess-board, .divv, .box, e .square - Compatível com xadrez.html e damas.js */
 
 .chess-board {
     display: flex;
@@ -179,37 +184,58 @@ button:disabled {
     display: flex;
 }
 
-/* Célula/Casa do tabuleiro */
-.box {
+/* Estilo Base para casas do Xadrez (.box) e Damas (.square) */
+.box, .square {
     list-style: none;
     width: 60px;
     height: 60px;
     display: flex;
     justify-content: center;
     align-items: center;
-    font-size: 0; 
+    font-size: 0; /* Esconde texto como 'Wpawn' */
     position: relative;
     cursor: pointer;
 }
 
-/* Cores das casas do tabuleiro */
+/* Cores das casas do Xadrez (para estrutura .divv > .box) */
 .divv:nth-child(odd) .box:nth-child(even),
 .divv:nth-child(even) .box:nth-child(odd) {
-    background-color: #f0d9b5; /* Casa clara */
+    background-color: var(--color-board-light); 
 }
 
 .divv:nth-child(odd) .box:nth-child(odd),
 .divv:nth-child(even) .box:nth-child(even) {
-    background-color: #b58863; /* Casa escura */
+    background-color: var(--color-board-dark);
 }
 
-/* Destaque para jogadas (UX) */
+/* Cores das casas de Damas (para estrutura com classes explícitas) */
+.white_square {
+    background-color: var(--color-board-light);
+}
+.black_square {
+    background-color: var(--color-board-dark);
+}
+
+/* Peças e Destaques */
 .highlight {
     box-shadow: inset 0 0 0 5px var(--color-primary);
 }
 
 .highlight-move {
     background-color: rgba(40, 167, 69, 0.5) !important;
+}
+
+/* === Estilo Específico para Damas: Peças === */
+/* Damas.js utiliza .white_checker e .black_checker. Se usar imagens, mantenha o seu CSS original */
+.white_checker {
+    background-color: #f8f9fa; /* Branco */
+    border-radius: 50%;
+    box-shadow: 0 0 5px rgba(0,0,0,0.5);
+}
+.black_checker {
+    background-color: #343a40; /* Preto */
+    border-radius: 50%;
+    box-shadow: 0 0 5px rgba(0,0,0,0.5);
 }
 
 /* Responsividade Geral */
@@ -231,7 +257,7 @@ button:disabled {
     }
     
     /* Xadrez/Damas Ajuste */
-    .box {
+    .box, .square {
         width: 40px;
         height: 40px;
     }
