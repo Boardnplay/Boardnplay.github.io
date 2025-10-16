@@ -1,94 +1,54 @@
+<!DOCTYPE html>
 <html>
 <head>
     <link rel="icon" href="https://i.postimg.cc/8cKvqZR6/Yellow-Blue-Retro-Dice-Game-Logo-7-removebg-preview.png">
-    <title>Board N Play</title>
-    <link rel="stylesheet" href="sudoku.css">
-	<meta charset="UTF-8">
+    <title>Board N Play - Sudoku</title>
+    <meta charset="UTF-8">
 	<meta name="viewport" content="width=device-width, initial-scale=1.0">
-</head>
+    <link rel="stylesheet" href="site-geral.css">
+    <link rel="stylesheet" href="sudoku.css"> </head>
 <body>
-	<img src="https://i.postimg.cc/Y0Mj2ZNP/Yellow-Blue-Retro-Dice-Game-Logo.png" class="center"/>
-        <br>
-        <table border="3" align="center">
-        <tr>
-            <td><a href="Boardnplay.html"> Inicio </a></td>
-            <td><a href="xadrez.html"> Xadrez </a></td>
-            <td><a href="damas.html"> Damas </a></td>
-            <td><a href="galo.html"> Jogo Do Galo </a></td>
-            <td><a href="sudoku.html"> Sudoku </a></td>
-        </tr>    
-        </table>
-	<br>
-        <hr color="#79ced1" width="100%" size="25">
-	<br>
+    <header class="site-header">
+        <img src="https://i.postimg.cc/Y0Mj2ZNP/Yellow-Blue-Retro-Dice-Game-Logo.png" class="logo" alt="Board N Play Logo" />
+        <nav class="main-nav">
+            <ul>
+                <li><a href="Boardnplay.html">Início</a></li>
+                <li><a href="xadrez.html">Xadrez</a></li>
+                <li><a href="damas.html">Damas</a></li>
+                <li><a href="galo.html">Jogo Do Galo</a></li>
+                <li><a href="sudoku.html" class="active">Sudoku</a></li>
+            </ul>
+        </nav>
+    </header>
+
+	<main class="main-content">
 	
-	<h1 align="center"> Sudoku </h1>
-<script src="sudoku3.js"></script>
-<script src="sudoku2.js"></script>
+        <h1> Sudoku </h1>
 	
-<div class="wrap">
-		
-<label for="toggleCandidates"> Ajudas: </label>
-<input id="toggleCandidates" class="js-candidate-toggle" type="checkbox"/>
+        <div class="game-area wrap">
+            <label for="toggleCandidates"> Ajudas: </label>
+            <input id="toggleCandidates" class="js-candidate-toggle" type="checkbox"/>
+            <br><br>
 
-Novo:
-<button type="button" class="sudokubutton1 js-generate-board-btn--easy">Fácil</button>
-<button type="button" class="sudokubutton2 js-generate-board-btn--medium">Médio</button>
-<button type="button" class="sudokubutton3 js-generate-board-btn--hard">Difícil</button>
-<button type="button" class="sudokubutton4 js-generate-board-btn--very-hard">Muito Difícil</button>
+            <div class="control-group">
+                <span>Novo:</span>
+                <button type="button" class="sudokubutton1 js-generate-board-btn--easy">Fácil</button>
+                <button type="button" class="sudokubutton2 js-generate-board-btn--medium">Médio</button>
+                <button type="button" class="sudokubutton3 js-generate-board-btn--hard">Difícil</button>
+                <button type="button" class="sudokubutton4 js-generate-board-btn--very-hard">Muito Difícil</button>
+            </div>
 
-<div id="sudoku" class="sudoku-board">
-</div>
+            <div id="sudoku" class="sudoku-board">
+                </div>
 
-Resolver: <button type="button" class="sudokubutton5 js-solve-step-btn"> 1 Passo </button>
-<button type="button" class="sudokubutton6 js-solve-all-btn"> Todos </button>
-<br>
-
-<button type="button" class="sudokubutton7 js-clear-board-btn"> Apagar </button>
-</div>
-	<script>
- var $candidateToggle = $(".js-candidate-toggle"),
- $generateBoardBtnEasy = $(".js-generate-board-btn--easy"),
- $generateBoardBtnMedium = $(".js-generate-board-btn--medium"),
- $generateBoardBtnHard = $(".js-generate-board-btn--hard"),
- $generateBoardBtnVeryHard = $(".js-generate-board-btn--very-hard"),
- 
- $solveStepBtn = $(".js-solve-step-btn"),
- $solveAllBtn = $(".js-solve-all-btn"),
- $clearBoardBtn = $(".js-clear-board-btn"),
- 
- mySudokuJS = $("#sudoku").sudokuJS({
-  difficulty: "very hard"
-
-  ,candidateShowToggleFn : function(showing){
-   $candidateToggle.prop("checked", showing);
-  }
- });
-
- $solveStepBtn.on("click", mySudokuJS.solveStep);
- $solveAllBtn.on("click", mySudokuJS.solveAll);
- $clearBoardBtn.on("click", mySudokuJS.clearBoard);
-
- $generateBoardBtnEasy.on("click", function(){
-  mySudokuJS.generateBoard("easy");
- });
- $generateBoardBtnMedium.on("click", function(){
-  mySudokuJS.generateBoard("medium");
- });
- $generateBoardBtnHard.on("click", function(){
-  mySudokuJS.generateBoard("hard");
- });
- $generateBoardBtnVeryHard.on("click", function(){
-  mySudokuJS.generateBoard("very hard");
- });
-
- $candidateToggle.on("change", function(){
-  if($candidateToggle.is(":checked"))
-   mySudokuJS.showCandidates();
-  else
-   mySudokuJS.hideCandidates();
- });
- $candidateToggle.trigger("change");
-</script>
+            <div class="control-group">
+                <span>Resolver:</span>
+                <button type="button" class="sudokubutton5 js-solve-step-btn"> 1 Passo </button>
+                <button type="button" class="sudokubutton6 js-solve-all-btn"> Todos </button>
+            </div>
+            
+            <button type="button" class="sudokubutton7 js-clear-board-btn"> Apagar </button>
+        </div>
+        </main>
 </body>
 </html>

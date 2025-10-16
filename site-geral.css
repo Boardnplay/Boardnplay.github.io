@@ -1,0 +1,246 @@
+:root {
+    --color-primary: #007bff;
+    --color-dark: #2c3e50;
+    --color-light: #ecf0f1;
+    --color-accent-green: #28a745;
+}
+
+/* Reset Básico */
+* {
+    margin: 0;
+    padding: 0;
+    box-sizing: border-box;
+}
+
+body {
+    font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+    background-color: var(--color-dark);
+    color: var(--color-light);
+    line-height: 1.6;
+    min-height: 100vh;
+}
+
+/* Estrutura do Cabeçalho e Navegação */
+.site-header {
+    background-color: #1a252f;
+    padding: 10px 0;
+    border-bottom: 3px solid var(--color-primary);
+    text-align: center;
+}
+
+.logo {
+    display: block;
+    margin: 0 auto 10px;
+    width: 200px;
+    height: auto;
+}
+
+.main-nav ul {
+    list-style: none;
+    display: flex;
+    justify-content: center;
+    padding: 0;
+    margin: 0;
+    flex-wrap: wrap;
+}
+
+.main-nav li {
+    margin: 0 15px;
+}
+
+.main-nav a {
+    color: var(--color-light);
+    text-decoration: none;
+    font-weight: 600;
+    padding: 8px 12px;
+    display: block;
+    border-radius: 4px;
+    transition: background-color 0.3s, color 0.3s;
+}
+
+.main-nav a:hover,
+.main-nav a.active {
+    background-color: var(--color-primary);
+    color: white;
+}
+
+/* Conteúdo Principal e Tipografia */
+.main-content {
+    max-width: 1200px;
+    margin: 30px auto;
+    padding: 0 20px;
+    text-align: center;
+}
+
+h1 {
+    color: var(--color-primary);
+    margin-bottom: 20px;
+    font-size: 2.5em;
+    text-transform: uppercase;
+    letter-spacing: 2px;
+}
+
+h2, h3, p {
+    color: var(--color-light);
+    margin: 15px auto;
+    max-width: 800px;
+}
+
+/* Estilos de Jogo Genéricos (Containers) */
+.game-area {
+    background-color: #34495e;
+    padding: 30px;
+    border-radius: 10px;
+    box-shadow: 0 0 15px rgba(0, 0, 0, 0.5);
+    display: inline-block;
+    margin-top: 20px;
+}
+
+/* Botões Genéricos */
+button, [class^="sudokubutton"] {
+    background-color: var(--color-accent-green);
+    color: white;
+    border: none;
+    padding: 10px 20px;
+    font-size: 1em;
+    font-weight: bold;
+    cursor: pointer;
+    border-radius: 5px;
+    margin: 5px;
+    transition: background-color 0.3s, transform 0.1s;
+    text-transform: uppercase;
+}
+
+button:hover, 
+[class^="sudokubutton"]:hover {
+    background-color: #1f8d42;
+    transform: translateY(-1px);
+}
+
+button:active,
+[class^="sudokubutton"]:active {
+    transform: translateY(1px);
+}
+
+button:disabled {
+    background-color: #555;
+    cursor: not-allowed;
+}
+
+/* === Estilo Específico para o Jogo do Galo (Tic-Tac-Toe) === */
+#cellContainer {
+    display: grid;
+    grid-template-columns: repeat(3, 100px);
+    grid-template-rows: repeat(3, 100px);
+    gap: 5px;
+    margin: 20px auto;
+    background-color: var(--color-dark);
+    padding: 10px;
+    border-radius: 5px;
+}
+
+.cell {
+    width: 100px;
+    height: 100px;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    font-size: 60px;
+    font-weight: bold;
+    color: var(--color-light);
+    background-color: #4a637d;
+    border-radius: 5px;
+    cursor: pointer;
+    transition: background-color 0.3s;
+}
+
+.cell:hover {
+    background-color: #5d7897;
+}
+
+#statusText {
+    font-size: 1.8em;
+    color: #ffc107;
+    margin-bottom: 20px;
+}
+
+/* === Estilo Específico para Xadrez e Damas (Tabuleiros 8x8) === */
+
+.chess-board {
+    display: flex;
+    flex-direction: column;
+    margin: 20px auto;
+    border: 5px solid #6d4c41;
+    box-shadow: 0 0 15px rgba(0, 0, 0, 0.7);
+    width: fit-content;
+}
+
+.divv {
+    display: flex;
+}
+
+/* Célula/Casa do tabuleiro */
+.box {
+    list-style: none;
+    width: 60px;
+    height: 60px;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    font-size: 0; 
+    position: relative;
+    cursor: pointer;
+}
+
+/* Cores das casas do tabuleiro */
+.divv:nth-child(odd) .box:nth-child(even),
+.divv:nth-child(even) .box:nth-child(odd) {
+    background-color: #f0d9b5; /* Casa clara */
+}
+
+.divv:nth-child(odd) .box:nth-child(odd),
+.divv:nth-child(even) .box:nth-child(even) {
+    background-color: #b58863; /* Casa escura */
+}
+
+/* Destaque para jogadas (UX) */
+.highlight {
+    box-shadow: inset 0 0 0 5px var(--color-primary);
+}
+
+.highlight-move {
+    background-color: rgba(40, 167, 69, 0.5) !important;
+}
+
+/* Responsividade Geral */
+@media (max-width: 768px) {
+    .logo { width: 150px; }
+    .main-nav li { margin: 5px; }
+    .main-nav a { padding: 5px 8px; font-size: 0.9em; }
+    h1 { font-size: 2em; }
+    
+    /* Galo Ajuste */
+    #cellContainer {
+        grid-template-columns: repeat(3, 80px);
+        grid-template-rows: repeat(3, 80px);
+    }
+    .cell {
+        width: 80px;
+        height: 80px;
+        font-size: 40px;
+    }
+    
+    /* Xadrez/Damas Ajuste */
+    .box {
+        width: 40px;
+        height: 40px;
+    }
+}
+
+@media (max-width: 480px) {
+    .main-nav ul {
+        flex-direction: column;
+        align-items: center;
+    }
+    .main-nav li { margin: 5px 0; }
+}
