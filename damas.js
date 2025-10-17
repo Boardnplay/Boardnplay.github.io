@@ -1,4 +1,4 @@
-/* damas.js - funcional com IA simples */
+/* damas.js - clean reimplementation */
 (function(){
   const boardEl = document.querySelector('.checker-board');
   const status = document.getElementById('statusText');
@@ -62,7 +62,7 @@
       if(cap){ doCapture(selected, [r,c],[cap[2],cap[3]]); return; }
       const mv = pm.moves.find(m=>m[0]===r && m[1]===c);
       if(mv){ movePiece(selected, [r,c]); selected=null; return; }
-      if(p && p.color===turn){ selected=[r,c]; highlight(); } else { selected=null; render();}
+      if(p && p.color===turn){ selected=[r,c]; highlight(); } else { selected=null; render(); }
     } else {
       if(p && p.color===turn){ selected=[r,c]; highlight(); }
     }
@@ -78,19 +78,15 @@
     const [fr,fc]=from, [tr,tc]=to, [cr,cc]=capPos; const p = board[fr][fc];
     board[tr][tc]=p; board[fr][fc]=null; board[cr][cc]=null; if(p.color==='w' && tr===0) p.king=true; if(p.color==='b' && tr===7) p.king=true; render();
     const pm = pieceMoves(tr,tc);
-    if(pm.captures.length){ mustContinue=[tr,tc]; selected=[tr,tc]; setStatus('Captura! Continua com a mesma peça.'); highlight(); } else { mustContinue=null; selected=null; endTurn(); }
+    if(pm.captures.length){ mustContinue=[tr,tc]; selected=[tr,tc]; setStatus('Captura! Continua.'); highlight(); } else { mustContinue=null; selected=null; endTurn(); }
   }
 
-  function endTurn(){ turn = (turn==='w'?'b':'w'); selected=null; mustContinue=null; render(); setStatus('Vez: '+(turn==='w'?'Brancas':'Pretas')); const moves = allMovesFor(turn); if(moves.length===0){ setStatus('Fim de jogo. '+(turn==='w'?'Pretas':'Brancas')+' vencem!'); return; } if(aiEnabled && turn==='b') setTimeout(runAI,300); }
+  function endTurn(){ turn = (turn==='w'?'b':'w'); selected=null; mustContinue=null; render(); setStatus('Vez: '+(turn==='w'?'Brancas':'Pretas')); const moves = allMovesFor(turn); if(moves.length===0){ setStatus('Fim de jogo. '+(turn==='w'?'Pretas':'Brancas')+' vencem!'); return; } if(aiEnabled && turn==='b') setTimeout(runAI,200); }
 
-  function runAI(){
-    const all = allMovesFor('b'); if(all.length===0) return endTurn();
-    const caps = all.filter(e=>e.captures && e.captures.length);
-    if(caps.length){ const chosen = caps[Math.floor(Math.random()*caps.length)]; const cap = chosen.captures[Math.floor(Math.random()*chosen.captures.length)]; doCapture(chosen.from, [cap[0],cap[1]], [cap[2],cap[3]]); } else { const simples = all.filter(e=>e.moves && e.moves.length); const pick = simples[Math.floor(Math.random()*simples.length)]; const mv = pick.moves[Math.floor(Math.random()*pick.moves.length)]; movePiece(pick.from, mv); }
-  }
+  function runAI(){ const all = allMovesFor('b'); if(all.length===0) return endTurn(); const caps = all.filter(e=>e.captures && e.captures.length); if(caps.length){ const chosen = caps[Math.floor(Math.random()*caps.length)]; const cap = chosen.captures[Math.floor(Math.random()*chosen.captures.length)]; doCapture(chosen.from, [cap[0],cap[1]], [cap[2],cap[3]]); } else { const simples = all.filter(e=>e.moves && e.moves.length); const pick = simples[Math.floor(Math.random()*simples.length)]; const mv = pick.moves[Math.floor(Math.random()*pick.moves.length)]; movePiece(pick.from, mv); } }
 
-  aiToggle.addEventListener('click', ()=>{ aiEnabled = !aiEnabled; aiToggle.textContent = 'IA: '+(aiEnabled?'ON':'OFF')+' (pretas)'; if(aiEnabled && turn==='b') setTimeout(runAI,300); });
+  aiToggle.addEventListener('click', ()=>{ aiEnabled = !aiEnabled; aiToggle.textContent = 'IA: '+(aiEnabled?'ON':'OFF')+' (pretas)'; if(aiEnabled && turn==='b') setTimeout(runAI,200); });
   restartBtn.addEventListener('click', reset);
   reset();
-  window._damas = { board, reset };
+  window._damas_refresh = { reset };
 })();

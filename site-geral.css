@@ -1,4 +1,3 @@
-
 * { margin:0; padding:0; box-sizing:border-box; font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; }
 html, body { width:100%; min-height:100vh; background:#f0f0f0; color:#333; }
 .site-header { background:#2c3e50; color:#fff; padding:10px 20px; position:fixed; top:0; left:0; width:100%; z-index:1000; display:flex; align-items:center; justify-content:space-between; }
@@ -19,7 +18,7 @@ html, body { width:100%; min-height:100vh; background:#f0f0f0; color:#333; }
 /* Chess */
 .chess-board { width:480px; height:480px; margin:20px auto; display:flex; flex-direction:column-reverse; border:4px solid #333; box-shadow:0 0 20px rgba(0,0,0,0.2); }
 .divv { display:flex; }
-.box { width:60px; height:60px; display:flex; justify-content:center; align-items:center; position:relative; font-size:0; cursor:pointer; }
+.box { width:60px; height:60px; display:flex; justify-content:center; align-items:center; position:relative; font-size:0; cursor:pointer; user-select:none; }
 .box:nth-child(odd) { background:#BA7A3A; }
 #row8 .box:nth-child(even), #row6 .box:nth-child(even), #row4 .box:nth-child(even), #row2 .box:nth-child(even) { background:#F0D2B4; }
 #row7 .box:nth-child(odd), #row5 .box:nth-child(odd), #row3 .box:nth-child(odd), #row1 .box:nth-child(odd) { background:#F0D2B4; }
